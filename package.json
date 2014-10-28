@@ -1,6 +1,6 @@
 {
   "name": "node-emt",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "out/lib/emt.js",
   "description": "Evgeny Muravjev Typograph's port",
   "homepage": "https://github.com/semencov/node-emt",
