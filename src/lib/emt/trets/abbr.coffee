@@ -40,7 +40,7 @@ class EMTretAbbr extends EMTret
       ]
       replacement : [
         '$1$1&nbsp;$1$1'
-        (match, m) -> m[1] + m[2] + "&nbsp;" + m[4] + (if m[5] == "3" or m[5] == "2" then "&sup" + m[5] + ";" else m[5]) + m[6]
+        (match, m) -> "#{m[1]}#{m[2]}&nbsp;#{m[4]}" + (if m[5] is "3" or m[5] is "2" then "&sup#{m[5]};" else m[5]) + m[6]
       ]
     nbsp_before_weight_unit:
       description : 'Замена символов и привязка сокращений в весовых величинах: г, кг, мг…'
@@ -63,9 +63,9 @@ class EMTretAbbr extends EMTret
         /(^|\s|\&nbsp\;)в( |\&nbsp\;)т\.?[ ]?ч(\.|$|\s|\&nbsp\;)/g
       ]
       replacement : [
-        (match, m) -> m[1] + @tag("и т. д.", "span",  {class: "nowrap"}) + (if m[3] != "." then m[3] else "")
-        (match, m) -> m[1] + @tag("и т. п.", "span",  {class: "nowrap"}) + (if m[3] != "." then m[3] else "")
-        (match, m) -> m[1] + @tag("в т. ч.", "span",  {class: "nowrap"}) + (if m[3] != "." then m[3] else "")
+        (match, m) -> m[1] + @tag("и т. д.", "span",  {class: "nowrap"}) + (if m[3] isnt "." then m[3] else "")
+        (match, m) -> m[1] + @tag("и т. п.", "span",  {class: "nowrap"}) + (if m[3] isnt "." then m[3] else "")
+        (match, m) -> m[1] + @tag("в т. ч.", "span",  {class: "nowrap"}) + (if m[3] isnt "." then m[3] else "")
       ]
     nbsp_te:
       description : 'Обработка т.е.'
@@ -77,17 +77,25 @@ class EMTretAbbr extends EMTret
       replacement : (match, m) -> m[1] + (if m[4] then "&nbsp;" + m[4] + (if m[4] == "тыс" then "." else "") else "") + "&nbsp;" + (if not m[7].match(/у[\\\\.]? ?е[\\\\.]?/gi) then m[7] else "у.е.")
     nbsp_org_abbr:
       description : 'Привязка сокращений форм собственности к названиям организаций'
-      pattern     : /([^a-zA-Zа-яёА-ЯЁ]|^)(ООО|ЗАО|ОАО|НИИ|ПБОЮЛ) ([a-zA-Zа-яёА-ЯЁ]|\"|\&laquo\;|\&bdquo\;|<)/g
-      replacement : '$1$1&nbsp;$1'
+      pattern     : [
+        /([^a-zA-Zа-яёА-ЯЁ]|^)(ООО|ЗАО|ОАО|НИИ|ПБОЮЛ) ([a-zA-Zа-яёА-ЯЁ]|\"|\&laquo\;|\&bdquo\;|<)/ig
+        /([^a-zA-Zа-яёА-ЯЁ]|^)(SIA|VAS|AAS|AS|IK) ([a-zA-Zа-яёА-ЯЁ]|\"|\&laquo\;|\&bdquo\;|<)/ig  # правило для Латвии
+      ]
+      replacement : [
+        "$1$2&nbsp;$3"
+        "$1$2&nbsp;$3"  # правило для Латвии
+      ]
     nobr_gost:
       description : 'Привязка сокращения ГОСТ к номеру'
       pattern     : [
         /(\040|\t|\&nbsp\;|^)ГОСТ( |\&nbsp\;)?(\d+)((\-|\&minus\;|\&mdash\;)(\d+))?(( |\&nbsp\;)(\-|\&mdash\;))?/ig
         /(\040|\t|\&nbsp\;|^|\>)ГОСТ( |\&nbsp\;)?(\d+)(\-|\&minus\;|\&mdash\;)(\d+)/ig
+        /(\040|\t|\&nbsp\;|^|\>)LVS( |\&nbsp\;)?(\d+)(\:|\-|)(\d+)/ig  # правило для Латвии
       ]
       replacement : [
-        (match, m) -> m[1] + @tag("ГОСТ " + m[3] + (if m[6]? then "&ndash;" + m[6] else "") + (if m[7]? then " &mdash;" else ""), "span", {class:"nowrap"})
-        (match, m) -> m[1] + "ГОСТ " + m[3] + "&ndash;" + m[5]
+        (match, m) -> m[1] + @tag("ГОСТ #{m[3]}" + (if m[6]? then "&ndash;" + m[6] else "") + (if m[7]? then " &mdash;" else ""), "span", {class:"nowrap"})
+        (match, m) -> m[1] + "ГОСТ #{m[3]}&ndash;#{m[5]}"
+        (match, m) -> m[1] + @tag("LVS #{m[3]}:#{m[5]}", "span", {class:"nowrap"})  # правило для Латвии
       ]
 
 

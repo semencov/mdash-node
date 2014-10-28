@@ -46,7 +46,7 @@
         pattern: [/(\s|^|\>|\&nbsp\;|\,)(\d+)( |\&nbsp\;)?(м|мм|см|дм|км|гм|km|dm|cm|mm)(\s|\.|\!|\?|\,|$|\&plusmn\;|\;)/ig, /(\s|^|\>|\&nbsp\;|\,)(\d+)( |\&nbsp\;)?(м|мм|см|дм|км|гм|km|dm|cm|mm)([32]|&sup3;|&sup2;)(\s|\.|\!|\?|\,|$|\&plusmn\;|\;)/ig],
         replacement: [
           '$1$1&nbsp;$1$1', function(match, m) {
-            return m[1] + m[2] + "&nbsp;" + m[4] + (m[5] === "3" || m[5] === "2" ? "&sup" + m[5] + ";" : m[5]) + m[6];
+            return ("" + m[1] + m[2] + "&nbsp;" + m[4]) + (m[5] === "3" || m[5] === "2" ? "&sup" + m[5] + ";" : m[5]) + m[6];
           }
         ]
       },
@@ -107,19 +107,23 @@
       },
       nbsp_org_abbr: {
         description: 'Привязка сокращений форм собственности к названиям организаций',
-        pattern: /([^a-zA-Zа-яёА-ЯЁ]|^)(ООО|ЗАО|ОАО|НИИ|ПБОЮЛ) ([a-zA-Zа-яёА-ЯЁ]|\"|\&laquo\;|\&bdquo\;|<)/g,
-        replacement: '$1$1&nbsp;$1'
+        pattern: [/([^a-zA-Zа-яёА-ЯЁ]|^)(ООО|ЗАО|ОАО|НИИ|ПБОЮЛ) ([a-zA-Zа-яёА-ЯЁ]|\"|\&laquo\;|\&bdquo\;|<)/ig, /([^a-zA-Zа-яёА-ЯЁ]|^)(SIA|VAS|AAS|AS|IK) ([a-zA-Zа-яёА-ЯЁ]|\"|\&laquo\;|\&bdquo\;|<)/ig],
+        replacement: ["$1$2&nbsp;$3", "$1$2&nbsp;$3"]
       },
       nobr_gost: {
         description: 'Привязка сокращения ГОСТ к номеру',
-        pattern: [/(\040|\t|\&nbsp\;|^)ГОСТ( |\&nbsp\;)?(\d+)((\-|\&minus\;|\&mdash\;)(\d+))?(( |\&nbsp\;)(\-|\&mdash\;))?/ig, /(\040|\t|\&nbsp\;|^|\>)ГОСТ( |\&nbsp\;)?(\d+)(\-|\&minus\;|\&mdash\;)(\d+)/ig],
+        pattern: [/(\040|\t|\&nbsp\;|^)ГОСТ( |\&nbsp\;)?(\d+)((\-|\&minus\;|\&mdash\;)(\d+))?(( |\&nbsp\;)(\-|\&mdash\;))?/ig, /(\040|\t|\&nbsp\;|^|\>)ГОСТ( |\&nbsp\;)?(\d+)(\-|\&minus\;|\&mdash\;)(\d+)/ig, /(\040|\t|\&nbsp\;|^|\>)LVS( |\&nbsp\;)?(\d+)(\:|\-|)(\d+)/ig],
         replacement: [
           function(match, m) {
-            return m[1] + this.tag("ГОСТ " + m[3] + (m[6] != null ? "&ndash;" + m[6] : "") + (m[7] != null ? " &mdash;" : ""), "span", {
+            return m[1] + this.tag(("ГОСТ " + m[3]) + (m[6] != null ? "&ndash;" + m[6] : "") + (m[7] != null ? " &mdash;" : ""), "span", {
               "class": "nowrap"
             });
           }, function(match, m) {
-            return m[1] + "ГОСТ " + m[3] + "&ndash;" + m[5];
+            return m[1] + ("ГОСТ " + m[3] + "&ndash;" + m[5]);
+          }, function(match, m) {
+            return m[1] + this.tag("LVS " + m[3] + ":" + m[5], "span", {
+              "class": "nowrap"
+            });
           }
         ]
       }

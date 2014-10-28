@@ -1,8 +1,9 @@
 {
   "name": "node-emt",
   "version": "0.1.2",
-  "main": "out/lib/emt.js",
-  "description": "Evgeny Muravjev Typograph's port",
+  "main": "./out/lib/emt",
+  "description": "Evgeny Muravjev Typograph's port from PHP",
+  "keywords": ["mdash", "mdash.ru", "typography", "typograf", "typographer", "api", "wrapper"],
   "homepage": "https://github.com/semencov/node-emt",
   "bugs": "https://github.com/semencov/node-emt/issues",
   "author": {
