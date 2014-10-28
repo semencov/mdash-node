@@ -1,2 +1,4 @@
+/src/test/
+/out/test/
 /node_modules/
 npm-debug.log
