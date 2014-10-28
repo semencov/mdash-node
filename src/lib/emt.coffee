@@ -332,9 +332,6 @@ class EMTBase
     @_text = EMTLib.clear_special_chars(@_text)
     @debug(@, 'clear_special_chars', @_text)
 
-    console.log @_text
-    console.log "--------------------------"
-
     for tret in atrets
       # // если установлен режим разметки тэгов то выставим его
       @tret_objects[tret].set_tag_layout_ifnotset(@use_layout)           if @use_layout_set
@@ -348,8 +345,6 @@ class EMTBase
       @tret_objects[tret].set_text(@_text)
       @_text = @tret_objects[tret].apply()
 
-      console.log @_text, "\n" if tret is "EMTretQuote"
-      
       # // соберём ошибки если таковые есть
       if @tret_objects[tret].errors.length > 0
         for err in @tret_objects[tret].errors
