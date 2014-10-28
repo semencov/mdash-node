@@ -27,9 +27,7 @@
       r_sign_replace: {
         description: 'Замена (R) на символ зарегистрированной торговой марки',
         pattern: /(.|^)\(r\)(.|$)/ig,
-        replacement: function(match, m) {
-          return "" + m[1] + "&reg;" + m[2];
-        }
+        replacement: '$1&reg;$2'
       },
       copy_replace: {
         description: 'Замена (c) на символ копирайт',

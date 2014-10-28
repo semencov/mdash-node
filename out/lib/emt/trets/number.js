@@ -18,7 +18,7 @@
       minus_between_nums: {
         description: 'Расстановка знака минус между числами',
         pattern: /(\d+)\-(\d)/gi,
-        replacement: '$1&minus;$1'
+        replacement: '$1&minus;$2'
       },
       minus_in_numbers_range: {
         description: 'Расстановка знака минус между диапозоном чисел',
@@ -31,26 +31,26 @@
         description: 'Замена x на символ × в размерных единицах',
         cycled: true,
         pattern: /([^a-zA-Z><]|^)(\&times\;)?(\d+)(\040*)(x|х)(\040*)(\d+)([^a-zA-Z><]|$)/g,
-        replacement: '$1$1$1&times;$1$1'
+        replacement: '$1$2$3&times;$7$8'
       },
       numeric_sub: {
         description: 'Нижний индекс',
         pattern: /([a-zа-яё0-9])\_([\d]{1,3})([^а-яёa-z0-9]|$)/ig,
         replacement: function(match, m) {
-          return m[1] + this.tag(this.tag(m2, "small"), "sub") + m[3];
+          return m[1] + this.tag(this.tag(m[2], "small"), "sub") + m[3];
         }
       },
       numeric_sup: {
         description: 'Верхний индекс',
         pattern: /([a-zа-яё0-9])\^([\d]{1,3})([^а-яёa-z0-9]|$)/ig,
         replacement: function(match, m) {
-          return m[1] + this.tag(this.tag(m2, "small"), "sup") + m[3];
+          return m[1] + this.tag(this.tag(m[2], "small"), "sup") + m[3];
         }
       },
       simple_fraction: {
         description: 'Замена дробей 1/2, 1/4, 3/4 на соответствующие символы',
         pattern: [/(^|\D)1\/(2|4)(\D)/g, /(^|\D)3\/4(\D)/g],
-        replacement: ['$1&frac1$1;$1', '$1&frac34;$1']
+        replacement: ['$1&frac1$2;$3', '$1&frac34;$2']
       },
       math_chars: {
         description: 'Математические знаки больше/меньше/плюс минус/неравно',
@@ -61,7 +61,7 @@
         description: 'Объединение триад чисел полупробелом',
         pattern: /([0-9]{1,3}( [0-9]{3}){1,})(.|$)/g,
         replacement: function(match, m) {
-          return (m[3] === "-" ? match : m1.replace(" ", "&thinsp;")) + m[3];
+          return (m[3] === "-" ? match : m[1].replace(" ", "&thinsp;")) + m[3];
         }
       },
       thinsp_between_no_and_number: {

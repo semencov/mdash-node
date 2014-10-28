@@ -30,7 +30,7 @@
         description: 'Расстановка тире и объединение в неразрывные периоды месяцев',
         disabled: true,
         pattern: /((январ|феврал|сентябр|октябр|ноябр|декабр)([ьяюе]|[её]м)|(апрел|июн|июл)([ьяюе]|ем)|(март|август)([ауе]|ом)?|ма[йяюе]|маем)\-((январ|феврал|сентябр|октябр|ноябр|декабр)([ьяюе]|[её]м)|(апрел|июн|июл)([ьяюе]|ем)|(март|август)([ауе]|ом)?|ма[йяюе]|маем)/gi,
-        replacement: '$1&mdash;$1'
+        replacement: '$1&mdash;$8'
       },
       nbsp_and_dash_month_interval: {
         description: 'Расстановка тире и объединение в неразрывные периоды дней',
@@ -47,11 +47,11 @@
         pattern: [/(\s|\&nbsp\;)([0-9]{2}\.[0-9]{2}\.([0-9]{2})?[0-9]{2})(\s|\&nbsp\;)?г(\.|\s|\&nbsp\;)/gi, /(\s|\&nbsp\;)([0-9]{2}\.[0-9]{2}\.([0-9]{2})?[0-9]{2})(\s|\&nbsp\;|\.(\s|\&nbsp\;|$)|$)/gi],
         replacement: [
           function(match, m) {
-            return m[1] + this.tag(m[2] + " г+", "span", {
+            return m[1] + this.tag("" + m[2] + " г.", "span", {
               "class": "nowrap"
             }) + (m[5] === "+" ? "" : " ");
           }, function(match, m) {
-            return m[1] + this.tag(m2, "span", {
+            return m[1] + this.tag(m[2], "span", {
               "class": "nowrap"
             }) + m[4];
           }
@@ -60,12 +60,12 @@
       space_posle_goda: {
         description: 'Пробел после года',
         pattern: /(^|\040|\&nbsp\;)([0-9]{3,4})(год([ауе]|ом)?)([^a-zа-яё]|$)/gi,
-        replacement: '$1$1 $1$1'
+        replacement: '$1$2 $3$5'
       },
       nbsp_posle_goda_abbr: {
         description: 'Пробел после года',
         pattern: /(^|\040|\&nbsp\;|\"|\&laquo\;)([0-9]{3,4})[ ]?(г\.)([^a-zа-яё]|$)/gi,
-        replacement: '$1$1&nbsp;$1$1'
+        replacement: '$1$2&nbsp;$3$4'
       }
     };
 

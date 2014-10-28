@@ -10,18 +10,18 @@ class EMTretNobr extends EMTret
     super_nbsp:
       description: 'Привязка союзов и предлогов к написанным после словам'
       pattern: /(\s|^|\&(la|bd)quo\;|\>|\(|\&mdash\;\&nbsp\;)([a-zа-яё]{1,2}\s+)([a-zа-яё]{1,2}\s+)?([a-zа-яё0-9\-]{2,}|[0-9])/ig
-      replacement: (match, m) -> m[1] + m[3].trim() + "&nbsp;" + (if m[4] then m[4].trim() + "&nbsp;" else "") + m[5]
+      replacement: (match, m) -> "#{m[1]}#{m[3].trim()}&nbsp;" + (if m[4] then "#{m[4].trim()}&nbsp;" else "") + m[5]
     nbsp_in_the_end:
       description: 'Привязка союзов и предлогов к предыдущим словам в случае конца предложения'
       pattern: /([a-zа-яё0-9\-]{3,}) ([a-zа-яё]{1,2})\.( [A-ZА-ЯЁ]|$)/g
-      replacement: '$1&nbsp;$1.$1'
+      replacement: '$1&nbsp;$2.$3'
     phone_builder:
       description: 'Объединение в неразрывные конструкции номеров телефонов'
       pattern: [
         /([^\d\+]|^)([\+]?[0-9]{1,3})( |\&nbsp\;|\&thinsp\;)([0-9]{3,4}|\([0-9]{3,4}\))( |\&nbsp\;|\&thinsp\;)([0-9]{2,3})(-|\&minus\;)([0-9]{2})(-|\&minus\;)([0-9]{2})([^\d]|$)/g
         /([^\d\+]|^)([\+]?[0-9]{1,3})( |\&nbsp\;|\&thinsp\;)([0-9]{3,4}|[0-9]{3,4})( |\&nbsp\;|\&thinsp\;)([0-9]{2,3})(-|\&minus\;)([0-9]{2})(-|\&minus\;)([0-9]{2})([^\d]|$)/g
       ]
-      replacement: (match, m) -> m[1] + (if m[1] == ">" or m[1] == "<" then "#{m[2]} #{m[4]} #{m[6]}-#{m[8]}-#{m[1]}" else @tag("#{m[2]} #{m[4]} #{m[6]}-#{m[8]}-#{m[1]}", "span", {class: "nowrap"})) + m[1]
+      replacement: (match, m) -> m[1] + (if m[1] is ">" or m[1] is "<" then "#{m[2]} #{m[4]} #{m[6]}-#{m[8]}-#{m[1]}" else @tag("#{m[2]} #{m[4]} #{m[6]}-#{m[8]}-#{m[1]}", "span", {class: "nowrap"})) + m[1]
     ip_address:
       description: 'Объединение IP-адресов'
       pattern: /(\s|\&nbsp\;|^)(\d{0,3}\.\d{0,3}\.\d{0,3}\.\d{0,3})/ig
@@ -39,7 +39,7 @@ class EMTretNobr extends EMTret
     nbsp_before_particle:
       description: 'Неразрывный пробел перед частицей'
       pattern: /(\040|\t)+(ли|бы|б|же|ж)(\&nbsp\;|\.|\,|\:|\;|\&hellip\;|\?|\s)/ig
-      replacement: (match, m) -> "&nbsp;#{m[2]}" + (if m[3] == "&nbsp;" then " " else m[3])
+      replacement: (match, m) -> "&nbsp;#{m[2]}" + (if m[3] is "&nbsp;" then " " else m[3])
     nbsp_v_kak_to:
       description: 'Неразрывный пробел в как то'
       pattern: /как то\:/gi
@@ -47,7 +47,7 @@ class EMTretNobr extends EMTret
     nbsp_celcius:
       description: 'Привязка градусов к числу'
       pattern: /(\s|^|\>|\&nbsp\;)(\d+)( |\&nbsp\;)?(°|\&deg\;)(C|С)(\s|\.|\!|\?|\,|$|\&nbsp\;|\;)/ig
-      replacement: '$1$1&nbsp;$1C$1'
+      replacement: '$1$2&nbsp;$4C$6'
     hyphen_nowrap_in_small_words:
       description: 'Обрамление пятисимвольных слов разделенных дефисом в неразрывные блоки'
       disabled: true

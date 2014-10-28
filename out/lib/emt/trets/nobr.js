@@ -23,13 +23,13 @@
         description: 'Привязка союзов и предлогов к написанным после словам',
         pattern: /(\s|^|\&(la|bd)quo\;|\>|\(|\&mdash\;\&nbsp\;)([a-zа-яё]{1,2}\s+)([a-zа-яё]{1,2}\s+)?([a-zа-яё0-9\-]{2,}|[0-9])/ig,
         replacement: function(match, m) {
-          return m[1] + m[3].trim() + "&nbsp;" + (m[4] ? m[4].trim() + "&nbsp;" : "") + m[5];
+          return ("" + m[1] + (m[3].trim()) + "&nbsp;") + (m[4] ? "" + (m[4].trim()) + "&nbsp;" : "") + m[5];
         }
       },
       nbsp_in_the_end: {
         description: 'Привязка союзов и предлогов к предыдущим словам в случае конца предложения',
         pattern: /([a-zа-яё0-9\-]{3,}) ([a-zа-яё]{1,2})\.( [A-ZА-ЯЁ]|$)/g,
-        replacement: '$1&nbsp;$1.$1'
+        replacement: '$1&nbsp;$2.$3'
       },
       phone_builder: {
         description: 'Объединение в неразрывные конструкции номеров телефонов',
@@ -77,7 +77,7 @@
       nbsp_celcius: {
         description: 'Привязка градусов к числу',
         pattern: /(\s|^|\>|\&nbsp\;)(\d+)( |\&nbsp\;)?(°|\&deg\;)(C|С)(\s|\.|\!|\?|\,|$|\&nbsp\;|\;)/ig,
-        replacement: '$1$1&nbsp;$1C$1'
+        replacement: '$1$2&nbsp;$4C$6'
       },
       hyphen_nowrap_in_small_words: {
         description: 'Обрамление пятисимвольных слов разделенных дефисом в неразрывные блоки',
