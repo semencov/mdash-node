@@ -473,8 +473,6 @@
       this.debug(this, 'safe_tag_chars', this._text);
       this._text = EMTLib.clear_special_chars(this._text);
       this.debug(this, 'clear_special_chars', this._text);
-      console.log(this._text);
-      console.log("--------------------------");
       for (_i = 0, _len = atrets.length; _i < _len; _i++) {
         tret = atrets[_i];
         if (this.use_layout_set) {
@@ -491,9 +489,6 @@
         }
         this.tret_objects[tret].set_text(this._text);
         this._text = this.tret_objects[tret].apply();
-        if (tret === "EMTretQuote") {
-          console.log(this._text, "\n");
-        }
         if (this.tret_objects[tret].errors.length > 0) {
           _ref = this.tret_objects[tret].errors;
           for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
@@ -825,7 +820,7 @@
 
     EMTBase.prototype.setup = function(setupmap) {
       var k, map, v, _i, _len, _ref;
-      if (!Array.isArray(setupmap)) {
+      if (!typeof setupmap === 'object') {
         return;
       }
       if ((setupmap['map'] != null) || (setupmap['maps'] != null)) {

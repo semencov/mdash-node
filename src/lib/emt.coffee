@@ -581,7 +581,7 @@ class EMTBase
    * @param array $setupmap
   ###
   setup: (setupmap) ->
-    return  if not Array.isArray(setupmap)
+    return  if not typeof setupmap is 'object'
     
     if setupmap['map']? or setupmap['maps']?
       if setupmap['map']?

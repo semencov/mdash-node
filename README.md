@@ -9,7 +9,7 @@ Install the module with: `npm install node-emt`
 var EMT = require('emt');
 var a = new EMT();
 a.set_text("Типографика - это круто!");
-console.log(a.apply());  // <p>Типографика&nbsp;&mdash; это круто!</p>
+console.log(a.apply());  // Типографика&nbsp;&mdash; это круто!
 ```
 
 ## Documentation
