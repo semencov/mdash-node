@@ -39,7 +39,7 @@ class EMTretAbbr extends EMTret
         /(\s|^|\>|\&nbsp\;|\,)(\d+)( |\&nbsp\;)?(м|мм|см|дм|км|гм|km|dm|cm|mm)([32]|&sup3;|&sup2;)(\s|\.|\!|\?|\,|$|\&plusmn\;|\;)/ig
       ]
       replacement : [
-        '$1$1&nbsp;$1$1'
+        '$1$2&nbsp;$4$5'
         (match, m) -> "#{m[1]}#{m[2]}&nbsp;#{m[4]}" + (if m[5] is "3" or m[5] is "2" then "&sup#{m[5]};" else m[5]) + m[6]
       ]
     nbsp_before_weight_unit:
