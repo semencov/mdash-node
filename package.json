@@ -1,0 +1,36 @@
+{
+  "name": "EMT",
+  "version": "0.1.0",
+  "main": "out/lib/emt.js",
+  "description": "Evgeny Muravjev Typograph's port",
+  "homepage": "https://github.com/semencov/node-emt",
+  "bugs": "https://github.com/semencov/node-emt/issues",
+  "author": {
+    "name": "Yuri Sementsov",
+    "email": "hello@semencov.com",
+    "url": "http://semencov.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/semencov/node-emt"
+  },
+  "licenses": [
+    {
+      "type": "Public Domain"
+    }
+  ],
+  "devDependencies": {
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-coffee": "~0.9.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-coffeelint": "~0.0.8",
+    "grunt-simple-mocha": "~0.4.0",
+    "should": "~3.1.2",
+    "matchdep": "~0.3.0",
+    "mocha-cakes": "~0.9.0",
+    "grunt": "~0.4.2"
+  },
+  "dependencies": {
+    "js-base64": "^2.1.5"
+  }
+}

@@ -1,0 +1,23 @@
+{
+	"no_tabs": {
+		"level": "ignore"
+	},
+	"indentation": {
+		"level": "ignore"
+	},
+	"max_line_length": {
+		"level": "ignore"
+	},
+	"arrow_spacing": {
+		"level": "ignore"
+	},
+	"no_empty_param_list": {
+		"level": "ignore"
+	},
+	"no_trailing_whitespace": {
+		"level": "ignore"
+	},
+	"no_stand_alone_at": {
+		"level": "ignore"
+	}
+}
