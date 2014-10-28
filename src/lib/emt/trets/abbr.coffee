@@ -11,15 +11,15 @@ class EMTretAbbr extends EMTret
     nobr_abbreviation:
       description :  'Расстановка пробелов перед сокращениями dpi, lpi'
       pattern     :  /(\s+|^|\>)(\d+)(\040|\t)*(dpi|lpi)([\s\;\.\?\!\:\(]|$)/ig
-      replacement :  '$1$1&nbsp;$1$1'
+      replacement :  '$1$2&nbsp;$4$5'
     nobr_acronym:
       description : 'Расстановка пробелов перед сокращениями гл., стр., рис., илл., ст., п.'
       pattern     : /(\s|^|\>|\()(гл|стр|рис|илл?|ст|п|с)\.(\040|\t)*(\d+)(\&nbsp\;|\s|\.|\,|\?|\!|$)/ig
-      replacement : '$1$1.&nbsp;$1$1'
+      replacement : '$1$2.&nbsp;$4$5'
     nobr_sm_im:
       description : 'Расстановка пробелов перед сокращениями см., им.'
       pattern     : /(\s|^|\>|\()(см|им)\.(\040|\t)*([а-яё0-9a-z]+)(\s|\.|\,|\?|\!|$)/ig
-      replacement : '$1$1.&nbsp;$1$1'
+      replacement : '$1$2.&nbsp;$4$5'
     nobr_locations:
       description : 'Расстановка пробелов в сокращениях г., ул., пер., д.'
       pattern     : [
@@ -28,9 +28,9 @@ class EMTretAbbr extends EMTret
         /(\s|^|\>)(д|кв|эт)\.(\040|\t)*(\d+)(\s|\.|\,|\?|\!|$)/ig
       ]
       replacement : [
-        '$1$1.&nbsp;$1$1'
-        '$1$1&nbsp;$1$1'
-        '$1$1.&nbsp;$1$1'
+        '$1$2.&nbsp;$4$5'
+        '$1$2&nbsp;$4$5'
+        '$1$2.&nbsp;$4$5'
       ]
     nbsp_before_unit:
       description : 'Замена символов и привязка сокращений в размерных величинах: м, см, м2…'
@@ -45,11 +45,11 @@ class EMTretAbbr extends EMTret
     nbsp_before_weight_unit:
       description : 'Замена символов и привязка сокращений в весовых величинах: г, кг, мг…'
       pattern     : /(\s|^|\>|\&nbsp\;|\,)(\d+)( |\&nbsp\;)?(г|кг|мг|т)(\s|\.|\!|\?|\,|$|\&nbsp\;|\;)/ig
-      replacement : '$1$1&nbsp;$1$1'
+      replacement : '$1$2&nbsp;$4$5'
     nobr_before_unit_volt:
       description : 'Установка пробельных символов в сокращении вольт'
       pattern     : /(\d+)([вВ]| В)(\s|\.|\!|\?|\,|$)/g
-      replacement : '$1&nbsp;В$1'
+      replacement : '$1&nbsp;В$3'
     ps_pps:
       description : 'Объединение сокращений P.S., P.P.S.'
       pattern     : /(^|\040|\t|\>|\r|\n)(p\.\040?)(p\.\040?)?(s\.)([^\<])/ig
