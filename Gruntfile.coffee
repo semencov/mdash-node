@@ -20,12 +20,19 @@ module.exports = (grunt) ->
         src: '<%= watch.test.files %>'
       options: grunt.file.readJSON('.coffeelintrc')
     coffee:
-      lib:
+      options:
+        bare: true
         expand: true
-        cwd: 'src/lib/'
-        src: ['**/*.coffee']
-        dest: 'out/lib/'
-        ext: '.js'
+        flatten: true
+      lib:
+        files:
+          'out/lib/mdash.js': [
+            # 'src/lib/mdash.base.coffee'
+            'src/lib/mdash.coffee'
+            'src/lib/mdash.lib.coffee'
+            'src/lib/mdash.tret.coffee'
+            'src/lib/mdash.tret.*.coffee'
+          ]
       test:
         expand: true
         cwd: 'src/test/'
