@@ -5,18 +5,7 @@ This is Node.js port of the original Typograph ([http://mdash.ru](http://mdash.r
 ## Getting Started
 Install the module with: `npm install mdash`
 
-```javascript
-var mdash = require('mdash');
-var a = new mdash();
-a.set_text("Типографика - это круто!");
-console.log(a.apply());  // Типографика&nbsp;&mdash; это круто!
-```
-
-## Documentation
-Currently this is a "dirty" port from PHP library which fully immitates its behavior excluding debuging and custom builds. So you can check the original documentation on [http://mdash.ru](http://mdash.ru). Optimizations and improvements will follow.
-
-## Milestone
-
+## Usage
 ```javascript
 var mdash = require('mdash');
 
@@ -31,6 +20,9 @@ console.log(c.format("Типографика - это круто!"));  // Тип
 
 console.log(mdash.format("Типографика - это круто!", {'Text.paragraphs': "off"}));  // Типографика&nbsp;&mdash; это круто!
 ```
+
+## Documentation
+Currently this is a "dirty" port from PHP library which fully immitates its behavior excluding debuging and custom builds. So you can check the original documentation on [http://mdash.ru](http://mdash.ru). Optimizations and improvements will follow.
 
 
 ## License
