@@ -27,7 +27,6 @@ module.exports = (grunt) ->
       lib:
         files:
           'out/lib/mdash.js': [
-            # 'src/lib/mdash.base.coffee'
             'src/lib/mdash.coffee'
             'src/lib/mdash.lib.coffee'
             'src/lib/mdash.tret.coffee'

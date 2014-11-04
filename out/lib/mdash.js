@@ -758,8 +758,7 @@ Mdash = (function() {
     if (typeof this.all_options[name] === 'string') {
       this.set(name, "active", value);
       return;
-    }
-    if (Array.isArray(this.all_options[name])) {
+    } else if (typeof this.all_options[name] === 'object') {
       if (this.all_options[name].selector != null) {
         settingname = "active";
         if (this.all_options[name].setting != null) {

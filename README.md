@@ -3,7 +3,7 @@
 This is Node.js port of the original Typograph ([http://mdash.ru](http://mdash.ru)) by Evgeny Muravjev & Alexander Drutsa
 
 ## Getting Started
-Install the module with: `npm install mdash`
+Install the module with: `npm install mdash-node`
 
 ## Usage
 ```javascript

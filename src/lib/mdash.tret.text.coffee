@@ -1,5 +1,3 @@
-# Mdash.Lib = require "./mdash.lib"
-# Mdash.Tret = require "./mdash.tret"
 
 class Mdash.Tret.Text extends Mdash.Tret
   title: "Текст и абзацы"

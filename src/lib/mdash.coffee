@@ -603,13 +603,12 @@ class Mdash
   ###
   do_setup: (name, value) ->
     return  if not @all_options[name]?
-    
+
     # // эта настройка связана с правилом ядра
     if typeof @all_options[name] is 'string'
       @set(name, "active", value)
       return
-
-    if Array.isArray(@all_options[name])
+    else if typeof @all_options[name] is 'object'
       if @all_options[name].selector?
         settingname = "active"
         settingname = @all_options[name].setting  if @all_options[name].setting?
