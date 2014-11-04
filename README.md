@@ -7,7 +7,7 @@ Install the module with: `npm install mdash`
 
 ## Usage
 ```javascript
-var mdash = require('mdash');
+var mdash = require('mdash-node');
 
 var a = new mdash("Типографика - это круто!");
 console.log(a.format());  // <p>Типографика&nbsp;&mdash; это круто!</p>
