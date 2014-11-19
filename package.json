@@ -1,9 +1,15 @@
 {
   "name": "mdash-node",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "main": "./out/lib/mdash",
   "description": "Evgeny Muravjev Typograph for Node.js",
-  "keywords": ["mdash", "mdash.ru", "typography", "typograf", "typographer"],
+  "keywords": [
+    "mdash",
+    "mdash.ru",
+    "typography",
+    "typograf",
+    "typographer"
+  ],
   "homepage": "https://github.com/semencov/mdash-node",
   "bugs": "https://github.com/semencov/mdash-node/issues",
   "author": {
@@ -32,6 +38,7 @@
     "grunt": "~0.4.2"
   },
   "dependencies": {
-    "js-base64": "^2.1.5"
+    "js-base64": "^2.1.5",
+    "underscore": "^1.7.0"
   }
 }

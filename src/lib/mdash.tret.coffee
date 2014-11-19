@@ -81,8 +81,8 @@ class Mdash.Tret
   
   getmethod: (name) ->
     return false  if not name
-    return false  if not name in this
-    return this[name]
+    return false  if not name of this
+    return @[name]
   
   _pre_parse: () ->
     @pre_parse()
@@ -120,11 +120,11 @@ class Mdash.Tret
     if rule.function?
       fn = rule.function
 
-      if typeof fn is 'string'
+      if _.isString fn
         fn = @[fn]
-        fn = eval(fn)  if typeof fn is 'string' and eval("typeof " + fn) is 'function'
+        fn = eval(fn)  if _.isString(fn) and _.isFunction(eval("typeof " + fn))
 
-      if typeof fn is 'function'
+      if _.isFunction fn
         Mdash.Lib.log "Правило #{name}", "Используется метод #{rule.function} в правиле"
         @text = fn.call(@, @text)
         return
@@ -133,20 +133,20 @@ class Mdash.Tret
       return
     else if rule.pattern?
       patterns = rule.pattern
-      patterns = new RegExp(Mdash.Lib.preg_quote patterns, 'g')  if typeof patterns is 'string'
-      patterns = [ patterns ]  if !Array.isArray patterns
+      patterns = new RegExp(Mdash.Lib.preg_quote patterns, 'g')  if _.isString patterns
+      patterns = [ patterns ]  if not _.isArray patterns
 
       for k, pattern of patterns
-        pattern = new RegExp(Mdash.Lib.preg_quote pattern, 'g')  if typeof pattern is 'string'
-        replacement = if Array.isArray(rule.replacement) then rule.replacement[k] else rule.replacement
+        pattern = new RegExp(Mdash.Lib.preg_quote pattern, 'g')  if _.isString pattern
+        replacement = if _.isArray(rule.replacement) then rule.replacement[k] else rule.replacement
 
-        if typeof replacement is 'string' and /^[a-z_0-9]+$/i.test replacement
+        if _.isString(replacement) and /^[a-z_0-9]+$/i.test replacement
           Mdash.Lib.log "Правило #{name}", "Замена с использованием replace с методом #{replacement}"
-          replacement = @[replacement]  if {}.hasOwnProperty.call(@, replacement)
+          replacement = @[replacement]  if {}.hasOwnProperty.call(this, replacement)
           replacement = eval(replacement)  if eval("typeof " + replacement)
 
         self = this
-        @text = @text.replace pattern, if typeof replacement is 'string' then replacement else () ->
+        @text = @text.replace pattern, if _.isString(replacement) then replacement else () ->
           match_all = arguments[0]
           replacement.call self, match_all, arguments
       return
@@ -190,7 +190,7 @@ class Mdash.Tret
     if attribute.class?
       classname = attribute.class
       if classname is "nowrap"
-        if !@is_on('nowrap')
+        if not @is_on('nowrap')
           tag = "nobr"
           attribute = {}
           classname = ""
@@ -284,10 +284,9 @@ class Mdash.Tret
    *
    * @param string $key
   ###
-  is_on: (key) ->
-    return false  if not @settings[key]?
-    kk = @settings[key]
-    return kk.toLowerCase() is "on" or kk is "1" or kk is true or kk is 1
+  is_on: (key, rule) ->
+    return false  if not @settings[key]? and not @rules[rule]?[key]?
+    "#{(@settings[key] or @rules[rule]?[key])}".toLowerCase() in ["on", "1", "true"]
   
   ###
    * Получить строковое значение настройки
@@ -296,8 +295,7 @@ class Mdash.Tret
    * @return unknown
   ###
   ss: (key) ->
-    return ""  if not @settings[key]?
-    return "#{@settings[key]}"
+    if not @settings[key]? then "" else "#{@settings[key]}"
   
   ###
    * Добавить настройку в правило
@@ -307,7 +305,7 @@ class Mdash.Tret
    * @param mixed $value значение
   ###
   set_rule: (rulename, key, value) ->
-    @rules[rulename][key] = value
+    @rules[rulename]?[key] = value
     return
   
   ###
@@ -318,7 +316,7 @@ class Mdash.Tret
    * @param boolean $strict строго, т.е. те которые не в списку будут тоже обработаны
   ###
   activate: (list, disable=false, strict=true) ->
-    return false if not Array.isArray(list)
+    return false if not _.isArray list
     
     for rulename in list
       if disable then @disable_rule(rulename) else @enable_rule(rulename)
@@ -344,9 +342,9 @@ class Mdash.Tret
    * @return string
   ###
   apply: (list=null) ->
-    if typeof list is 'string'
+    if _.isString list
       rlist = [list]
-    else if Array.isArray(list)
+    else if _.isArray list
       rlist = list
     else
       rlist = Object.keys(@rules)

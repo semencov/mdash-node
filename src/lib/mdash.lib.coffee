@@ -98,8 +98,38 @@ class Mdash.Lib
     return
   
 
-  @isInt = (num) ->
-    typeof num is "number" and isFinite(num) and num%1 is 0
+  # Read a file, return its contents.
+  @readFile: (filepath) ->
+    contents = undefined
+    try
+      contents = fs.readFileSync(String(filepath))
+      return contents
+    catch e
+      Mdash.Lib.error("Unable to read '#{filepath}' file (Error code: #{e.code}).", e)
+    return
+
+  # Read a file, parse its contents, return an object.
+  @readJSON: (filepath) ->
+    src = @readFile(filepath)
+    result = undefined
+    try
+      result = JSON.parse(src)
+      return result
+    catch e
+      Mdash.Lib.error("Unable to parse '#{filepath}' file (#{e.message}).", e)
+    return
+
+  # Read a YAML file, parse its contents, return an object.
+  @readYAML: (filepath) ->
+    src = @readFile(filepath)
+    result = undefined
+    try
+      result = YAML.load(src)
+      return result
+    catch e
+      Mdash.Lib.error("Unable to parse '#{filepath}' file (#{e.problem}).", e)
+    return
+
 
   @preg_quote = (str, delimiter) ->
     String str
@@ -154,9 +184,9 @@ class Mdash.Lib
    * @return  string|bool
   ###
   @clear_special_chars = (text, mode=null) ->
-    mode = [mode]  if typeof mode is 'string'
+    mode = [mode]  if _.isString mode
     mode = ['utf8', 'html']  if not mode?
-    return false  if not Array.isArray(mode)
+    return false  if not _.isArray mode
     moder = []
 
     for mod in mode
@@ -167,7 +197,7 @@ class Mdash.Lib
       for type in mode
         if vals[type]?
           for v in vals[type]
-            if type is 'utf8' and @isInt(v)
+            if type is 'utf8' and _.isFinite(v)
               v = @_getUnicodeChar(v)
 
             if type is 'html'
@@ -191,9 +221,9 @@ class Mdash.Lib
     ignore = null
     
     if allowableTag?
-      allowableTag = [allowableTag]  if typeof allowableTag is 'string'
+      allowableTag = [allowableTag]  if _.isString allowableTag
 
-      if Array.isArray(allowableTag)
+      if _.isArray allowableTag
         tags = []
         for tag in allowableTag
           continue  if tag.substr(0, 1) isnt '<' or tag.substr(-1, 1) isnt '>'
@@ -312,7 +342,7 @@ class Mdash.Lib
     
     
   @strpos_ex = (haystack, needle, offset = null) ->
-    if Array.isArray(needle)
+    if _.isArray needle
       m = -1
       w = false
 
@@ -335,11 +365,11 @@ class Mdash.Lib
     haystack.indexOf needle, offset
 
     
-  @_process_selector_pattern = (pattern) ->
+  @process_selector_pattern = (pattern) ->
     return  if pattern is false
     pattern = @preg_quote(pattern, '/')
     pattern = pattern.replace("\\*", "[a-z0-9_\-]*")
-    pattern = new RegExp(pattern, 'ig')
+    pattern = new RegExp("^#{pattern}$", 'ig')
 
   @_test_pattern = (pattern, text) ->
     return true  if pattern is false
@@ -637,15 +667,14 @@ class Mdash.Lib
   ###
   @convert_html_entities_to_unicode = (text) ->
     text = text.replace /\&#([0-9]+)\;/g, (match, m) ->
-      _getUnicodeChar(parseInt(m))
+      Mdash.Lib._getUnicodeChar(parseInt(m))
 
     text = text.replace /\&#x([0-9A-F]+)\;/g, (match, m) ->
-      _getUnicodeChar(parseInt(m, 16))
+      Mdash.Lib._getUnicodeChar(parseInt(m, 16))
 
     text = text.replace /\&([a-zA-Z0-9]+)\;/g, (match, m) ->
-      r = html_char_entity_to_unicode(m)
+      r = Mdash.Lib.html_char_entity_to_unicode(m)
       return r or match
-      
     text
   
   @rstrpos = (haystack, needle, offset=0) ->

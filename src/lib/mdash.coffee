@@ -1,6 +1,8 @@
 path = require('path')
 fs = require('fs')
 
+_ = require 'underscore'
+
 ###
 * Evgeny Muravjev Typograph, http://mdash.ru
 * Version: 3.0 Gold Master
@@ -17,141 +19,44 @@ process.on 'uncaughtException', (error) ->
 
 class Mdash
   text: null
-
-  trets: [
-    'Mdash.Tret.Quote'
-    'Mdash.Tret.Dash'
-    'Mdash.Tret.Symbol'
-    'Mdash.Tret.Punctmark'
-    'Mdash.Tret.Number'
-    'Mdash.Tret.Space'
-    'Mdash.Tret.Abbr'
-    'Mdash.Tret.Nobr'
-    'Mdash.Tret.Date'
-    'Mdash.Tret.OptAlign'
-    'Mdash.Tret.Etc'
-    'Mdash.Tret.Text'
-  ]
+  trets: []
   
   all_options:
-    'Quote.quotes':
-      description : 'Расстановка «кавычек-елочек» первого уровня'
-      selector    : "Quote.*quote"
-    'Quote.quotation':
-      description : 'Внутренние кавычки-лапки'
-      selector    : "Quote"
-      setting     : 'no_bdquotes'
-      reversed    : true
-              
-    'Dash.to_libo_nibud'                : 'direct'
-    'Dash.iz_za_pod'                    : 'direct'
-    'Dash.ka_de_kas'                    : 'direct'
+    'Quote':    
+      no_bdquotes : true    # Внутренние кавычки-лапки
+      no_inches   : true    # Расстановка дюйма после числа
     
-    'Nobr.super_nbsp'                   : 'direct'
-    'Nobr.nbsp_in_the_end'              : 'direct'
-    'Nobr.phone_builder'                : 'direct'
-    'Nobr.ip_address'                   : 'direct'
-    'Nobr.spaces_nobr_in_surname_abbr'  : 'direct'
-    'Nobr.nbsp_celcius'                 : 'direct'
-    'Nobr.hyphen_nowrap_in_small_words' : 'direct'
-    'Nobr.hyphen_nowrap'                : 'direct'
     'Nobr.nowrap':
-      description : 'Nobr (по умолчанию) & nowrap'
-      disabled    : true
-      selector    : '*'
-      setting     : 'nowrap'
+      disabled : false
+      selector : '*'
+      nowrap   : true       # Nobr (по умолчанию) & nowrap
     
-    'Symbol.tm_replace'     : 'direct'
-    'Symbol.r_sign_replace' : 'direct'
-    'Symbol.copy_replace'   : 'direct'
-    'Symbol.apostrophe'     : 'direct'
-    'Symbol.degree_f'       : 'direct'
-    'Symbol.arrows_symbols' : 'direct'
-    'Symbol.no_inches':
-      description : 'Расстановка дюйма после числа'
-      selector    : "Quote"
-      setting     : 'no_inches'
-      reversed    : true
-    
-    'Punctmark.auto_comma'                  : 'direct'
-    'Punctmark.hellip'                      : 'direct'
-    'Punctmark.fix_pmarks'                  : 'direct'
-    'Punctmark.fix_excl_quest_marks'        : 'direct'
-    'Punctmark.dot_on_end'                  : 'direct'
-    
-    'Number.minus_between_nums'             : 'direct'
-    'Number.minus_in_numbers_range'         : 'direct'
-    'Number.auto_times_x'                   : 'direct'
-    'Number.simple_fraction'                : 'direct'
-    'Number.math_chars'                     : 'direct'
-    'Number.thinsp_between_number_triads'   : 'direct'
-    'Number.thinsp_between_no_and_number'   : 'direct'
-    'Number.thinsp_between_sect_and_number' : 'direct'
-    
-    'Date.years'                            : 'direct'
-    'Date.mdash_month_interval'             : 'direct'
-    'Date.nbsp_and_dash_month_interval'     : 'direct'
-    'Date.nobr_year_in_date'                : 'direct'
-    
-    'Space.many_spaces_to_one'              : 'direct'
-    'Space.clear_percent'                   : 'direct'
-    'Space.clear_before_after_punct':
-      description : 'Удаление пробелов перед и после знаков препинания в предложении'
+    'Space.clear_before_after_punct':     # Удаление пробелов перед и после знаков препинания в предложении
       selector    : 'Space.remove_space_before_punctuationmarks'
-    'Space.autospace_after':
-      description : 'Расстановка пробелов после знаков препинания'
+    'Space.autospace_after':            # Расстановка пробелов после знаков препинания
       selector    : 'Space.autospace_after_*'
-    'Space.bracket_fix':
-      description : 'Удаление пробелов внутри скобок, а также расстановка пробела перед скобками'
+    'Space.bracket_fix':              # Удаление пробелов внутри скобок, а также расстановка пробела перед скобками
       selector    : ['Space.nbsp_before_open_quote', 'Punctmark.fix_brackets']
         
-    'Abbr.nbsp_money_abbr'       : 'direct'
-    'Abbr.nobr_vtch_itd_itp'     : 'direct'
-    'Abbr.nobr_sm_im'            : 'direct'
-    'Abbr.nobr_acronym'          : 'direct'
-    'Abbr.nobr_locations'        : 'direct'
-    'Abbr.nobr_abbreviation'     : 'direct'
-    'Abbr.ps_pps'                : 'direct'
-    'Abbr.nbsp_org_abbr'         : 'direct'
-    'Abbr.nobr_gost'             : 'direct'
-    'Abbr.nobr_before_unit_volt' : 'direct'
-    'Abbr.nbsp_before_unit'      : 'direct'
-    
-    'OptAlign.all':
-      description : 'Все настройки оптического выравнивания'
-      hide        : true
-      selector    : 'OptAlign.*'
-    'OptAlign.oa_oquote'        : 'direct'
-    'OptAlign.oa_obracket_coma' : 'direct'
-    'OptAlign.oa_oquote_extra'  : 'direct'
     'OptAlign.layout':
+      selector: 'OptAlign.*'
       description : 'Inline стили или CSS'
     
-    'Text.paragraphs'      : 'direct'
-    'Text.auto_links'      : 'direct'
-    'Text.email'           : 'direct'
-    'Text.breakline'       : 'direct'
-    'Text.no_repeat_words' : 'direct'
-    
     'Etc.unicode_convert':
-      description : 'Преобразовывать html-сущности в юникод'
-      selector    : '*'
-      setting     : 'dounicode'
-      disabled    : false
+      selector  : '*'
+      dounicode : true      # Преобразовывать html-сущности в юникод
+      disabled  : true
   
-
+ 
   constructor: (text, options={}) ->
     @DEBUG = false
 
-    if typeof text is 'object'
+    if _.isObject text
       options = text
       text = null
 
-    mdashrc_path = path.dirname(require.main.filename) + "/.mdash"
-    mdashrc = @readJSON(mdashrc_path) or @readYAML(mdashrc_path) or {}
-
-    mdashrc[key] = val  for key, val of options
-    options = mdashrc
+    mdashrc = path.dirname(require.main.filename) + "/.mdash"
+    options = _.extend (Mdash.Lib.readJSON(mdashrc) or Mdash.Lib.readYAML(mdashrc) or {}), options
 
     @inited = false
     @text = text
@@ -162,6 +67,7 @@ class Mdash
     @use_layout_set = false
     @disable_notg_replace = false
     @remove_notg = false
+    
     
     @settings = {}
     @blocks = []
@@ -192,7 +98,7 @@ class Mdash
    *
    * @return  array
   ###
-  get_allsafe_blocks: () -> @safe_blocks
+  get_allsafe_blocks: () -> @blocks
     
   ###
    * Удаленного блока по его номеру ключа
@@ -201,8 +107,8 @@ class Mdash
    * @return  void
   ###
   remove_safe_block: (id) ->
-    for k, block of @safe_blocks
-      delete @safe_blocks[k]  if block.id is id
+    for k, block of @blocks
+      delete @blocks[k]  if block.id is id
     return
     
     
@@ -213,7 +119,7 @@ class Mdash
    * @return  void
   ###
   add_safe_tag: (tag) ->
-    open = Mdash.Lib.preg_quote("<", '/') + "#{tag}[^>]*?" +  Mdash.Lib.preg_quote(">", '/')
+    open = Mdash.Lib.preg_quote("<#{tag}[^>]*?>", '/')
     close = Mdash.Lib.preg_quote("</#{tag}>", '/')
     @push_safe_block(tag, open, close, tag)
     return true
@@ -262,9 +168,10 @@ class Mdash
    * @param   string $text
    * @return  string
   ###
-  decode_internal_blocks: (text) ->
-    Mdash.Lib.decode_internal_blocks(text)
+  # decode_internal_blocks: (text) ->
+  #   Mdash.Lib.decode_internal_blocks(text)
   
+
   create_object: (tret) ->
     tret = @get_short_tret(tret)  if typeof tret is 'string'
     obj = if typeof tret is 'string' then new Mdash.Tret[tret]() else new tret()
@@ -282,7 +189,7 @@ class Mdash
     return tretName
   
   init: () ->
-    for tretName in @trets
+    for tretName in @get_trets_list()
       continue  if @tret_objects[tretName]?
       obj = @create_object(tretName)
       continue  if not obj?
@@ -300,37 +207,6 @@ class Mdash
   
   
   ###
-   * Добавить Трэт, 
-   *
-   * @param mixed $class - имя класса трета, или сам объект
-   * @param string $altname - альтернативное имя, если хотим например иметь два одинаоковых терта в обработке
-   * @return unknown
-  ###
-  add_tret: (tretClass, altname=false) ->
-    if typeof tretClass is 'object'
-      if not tretClass instanceof "Mdash.Tret"
-        Mdash.Lib.error("You are adding Tret that doesn't inherit base class Mdash.Tret", tretClass)
-        return false
-      
-      # tretClass.mdash = @
-      tretClass.DEBUG = @DEBUG
-
-      @tret_objects[(if altname then altname else tretClass.constructor.name)] = tretClass
-      @trets.push (if altname then altname else tretClass.constructor.name)
-      return true
-
-    if typeof tretClass is 'string'
-      obj = @create_object(tretClass)
-      return false  if not obj?
-        
-      @tret_objects[(if altname then altname else tretClass)] = obj
-      @trets.push (if altname then altname else tretClass)
-      return true
-
-    Mdash.Lib.error("Чтобы добавить трэт необходимо передать имя или объект")
-    return false
-  
-  ###
    * Получаем ТРЕТ по идентификатору, т.е. заванию класса
    *
    * @param unknown_type $name
@@ -338,7 +214,7 @@ class Mdash
   get_tret: (name) ->
     return @tret_objects[name]  if @tret_objects[name]?
 
-    for tret in @trets
+    for tret in @get_trets_list()
       if tret is name
         @init()
         return @tret_objects[name]
@@ -359,59 +235,6 @@ class Mdash
     @text = text
   
   
-  
-  ###
-   * Запустить типограф на выполнение
-   *
-  ###
-  format: (text, options=null) ->
-    @set_text(text)  if text?
-    @setup(options)  if options?
-    
-    @init()
-
-    Mdash.Lib.debug(this, 'init', @text)
-    
-    @text = @safe_blocks(@text, true)
-    Mdash.Lib.debug(this, 'safe_blocks', @text)
-    
-    @text = Mdash.Lib.safe_tag_chars(@text, true)
-    Mdash.Lib.debug(this, 'safe_tag_chars', @text)
-    
-    @text = Mdash.Lib.clear_special_chars(@text)
-    Mdash.Lib.debug(this, 'clear_special_chars', @text)
-
-    for tret in @trets
-      # // если установлен режим разметки тэгов то выставим его
-      @tret_objects[tret].set_tag_layout_ifnotset(@use_layout)           if @use_layout_set
-      @tret_objects[tret].set_class_layout_prefix(@class_layout_prefix)  if @class_layout_prefix
-      
-      # // влючаем, если нужно
-      @tret_objects[tret].DEBUG = @DEBUG
-            
-      # // применяем трэт
-      @tret_objects[tret].set_text(@text)
-      @text = @tret_objects[tret].apply()
-
-    @text = @decode_internal_blocks(@text)
-    Mdash.Lib.debug(this, 'decode_internal_blocks', @text)
-    
-    if @is_on('dounicode')
-      Mdash.Lib.convert_html_entities_to_unicode(@text)
-    
-    @text = Mdash.Lib.safe_tag_chars(@text, false)
-    Mdash.Lib.debug(this, 'unsafe_tag_chars', @text)
-    
-    @text = @safe_blocks(@text, false)
-    Mdash.Lib.debug(this, 'unsafe_blocks', @text)
-    
-    if not @disable_notg_replace
-      repl = ['<span class="_notg_start"></span>', '<span class="_notg_end"></span>']
-      repl = ""  if @remove_notg
-      @text = @text.replace(['<notg>','</notg>'], repl)
-
-    @text.trim()
-  
   ###
    * Получить содержимое <style></style> при использовании классов
    * 
@@ -420,12 +243,11 @@ class Mdash
    * @return string|array
   ###
   get_style: (list=false, compact=false) ->
-    @_init()
-    
     res = {}
-    for tret in @trets
-      arr = @tret_objects[tret].classes
-      continue  if not Array.isArray(arr)
+    for tret in @get_trets_list()
+      tretObj = @get_tret(tret)
+      arr = tretObj.classes
+      continue  if not _.isArray arr
 
       for classname, str of arr
         continue  if compact and not str
@@ -462,222 +284,195 @@ class Mdash
     @class_layout_prefix = if prefix? then "mdash_" else prefix
   
   ###
-   * Включить/отключить правила, согласно карте
-   * Формат карты:
-   *    'Название трэта 1' => array ( 'правило1', 'правило2' , ...  )
-   *    'Название трэта 2' => array ( 'правило1', 'правило2' , ...  )
-   *
-   * @param array $map
-   * @param boolean $disable если ложно, то $map соотвествует тем правилам, которые надо включить
-   *                         иначе это список правил, которые надо выключить
-   * @param boolean $strict строго, т.е. те которые не в списку будут тоже обработаны
-  ###
-  set_enable_map: (map, disable=false, strict=true) ->
-    return  if not Array.isArray(map)
-    trets = []
-
-    for tret, list of map
-      tretx = @get_tret(tret)
-      if not tretx
-        Mdash.Lib.log("Трэт #{tret} не найден при применении карты включаемых правил")
-        continue
-
-      trets.push tretx
-      
-      if list is true # // все
-        tretx.activate [], not disable, true
-      else if typeof list is 'string'
-        tretx.activate [list], disable, strict
-      else if Array.isArray(list)
-        tretx.activate list, disable, strict
-
-    if strict
-      for tret in @trets
-        continue  if trets in @tret_objects[tret]
-        @tret_objects[tret].activate [], disable, true
-    
-    return
-  
-  
-  ###
    * Установлена ли настройка
    *
    * @param string $key
   ###
   is_on: (key) ->
-    return false  if not @settings[key]?
-    kk = @settings[key]
-    kk.toLowerCase() is "on" or kk is "1" or kk is true or kk is 1
-  
-  
-  ###
-   * Установить настройку
-   *
-   * @param mixed $selector
-   * @param string $setting
-   * @param mixed $value
-  ###
-  doset: (selector, key, value) ->
-    tret_pattern = false
-    rule_pattern = false
+    return false  if not @settings["*"]?[key]?
+    "#{@settings["*"][key]}".toLowerCase() in ["on", "true", "1", "direct"]
 
-    if typeof selector is 'string'
-      if selector.indexOf(".") is -1
-        tret_pattern = selector
-      else
-        pa = selector.split(".")
-        tret_pattern = pa[0]
-        pa.shift()
-        rule_pattern = pa.join(".")
-
-    tret_pattern = Mdash.Lib._process_selector_pattern(tret_pattern)
-    rule_pattern = Mdash.Lib._process_selector_pattern(rule_pattern)
-
-    @settings[key] = value  if selector is "*"
-
-    for tret in @trets
-      t1 = @get_short_tret(tret)
-      continue  if not Mdash.Lib._test_pattern(tret_pattern, t1) and not Mdash.Lib._test_pattern(tret_pattern, tret)
-      tret_obj = @get_tret(tret)
-
-      if key is "active"
-        for rulename, v of tret_obj.rules
-          continue  if not Mdash.Lib._test_pattern(rule_pattern, rulename)
-          tret_obj.enable_rule(rulename)  if value.toLowerCase() is "on" or value is 1 or value is true or value is "1"
-          tret_obj.disable_rule(rulename)  if value.toLowerCase() is "off" or value is 0 or value is false or value is "0"
-      else
-        if rule_pattern is false
-          tret_obj.set(key, value)
-        else
-          for rulename, v of tret_obj.rules
-            continue  if not Mdash.Lib._test_pattern(rule_pattern, rulename)
-            tret_obj.set_rule(rulename, key, value)
-
-      @tret_objects[tret] = tret_obj
-    return
-  
-  ###
-   * Установить настройки для тертов и правил
-   *  1. если селектор является массивом, то тогда утсановка правил будет выполнена для каждого
-   *     элемента этого массива, как отдельного селектора.
-   *  2. Если $key не является массивом, то эта настрока будет проставлена согласно селектору
-   *  3. Если $key массив - то будет задана группа настроек
-   *       - если $value массив , то настройки определяются по ключам из массива $key, а значения из $value
-   *       - иначе, $key содержит ключ-значение как массив  
-   *
-   * @param mixed $selector
-   * @param mixed $key
-   * @param mixed $value
-  ###
-  set: (selector, key, value=false) ->
-    if Array.isArray(selector)
-      @set(val, key, value)  for val in selector
-      return
-
-    if Array.isArray(key)
-      for x, y of key
-        if Array.isArray(value)
-          kk = y
-          vv = value[x]
-        else
-          kk = x
-          vv = y
-
-        @set(selector, kk, vv)
-    @doset(selector, key, value)
-    return
-  
   
   ###
    * Возвращает список текущих третов, которые установлены
    *
   ###
-  get_trets_list: () ->
-    @trets
+  get_trets_list: (short=false) ->
+    _.chain(Object.keys(Mdash.Tret))
+      .filter (name) -> _.isEqual Mdash.Tret[name].__super__, Mdash.Tret::
+      .map (name) -> if short then name else "Mdash.Tret.#{name}"
+      .value()
+
+  get_rules_list: (mask) ->
+    trets = @get_trets_list(true)
+    result = {}
+
+    for tret in trets
+      result[tret] = {}
+      for rule, action of Mdash.Tret[tret]::rules
+        result[tret][rule] = if not (action.disabled? and action.disabled) or (action.enabled? and action.enabled) then "on" else "off"
+
+    if mask then @select_rules(mask, result) else result
+
+  select_rules: (mask="*", rules=@get_rules_list()) ->
+    selected = {}
+    mask = [mask]  if _.isString mask
+
+    for m in mask
+      m = m.split(".")
+      name = m[0]
+      pattern = Mdash.Lib.process_selector_pattern(name)
+
+      _.map Object.keys(rules), (key) ->
+        selected[key] = rules[key]  if key.match pattern
+        return
+
+      selected[name] = @select_rules(m.slice(1).join("."), rules[name])  if m.length > 1 and selected[name]?
+    selected
   
-  ###
-   * Установка одной метанастройки
-   *
-   * @param string $name
-   * @param mixed $value
-  ###
-  do_setup: (name, value) ->
-    return  if not @all_options[name]?
+  prepare_settings: (options={}, defaults={}) ->
+    return options if not _.isObject options
 
-    # // эта настройка связана с правилом ядра
-    if typeof @all_options[name] is 'string'
-      @set(name, "active", value)
-      return
-    else if typeof @all_options[name] is 'object'
-      if @all_options[name].selector?
-        settingname = "active"
-        settingname = @all_options[name].setting  if @all_options[name].setting?
-        @set(@all_options[name].selector, settingname, value)
+    settings = {}
 
-    if name is "OptAlign.layout"
-      @set_tag_layout(Mdash.Lib.LAYOUT_STYLE)  if value is "style"
-      @set_tag_layout(Mdash.Lib.LAYOUT_CLASS)  if value is "class"
+    for selector, value of options
+      value = true   if "#{value}".toLowerCase() in ["on", "true", "1", "direct"]
+      value = false  if "#{value}".toLowerCase() in ["off", "false", "0"]
+      value = {disabled: (value is false)}  if _.isBoolean value
 
-    return
-  
-  # Read a file, return its contents.
-  readFile: (filepath) ->
-    contents = undefined
-    try
-      contents = fs.readFileSync(String(filepath))
-      return contents
-    catch e
-      Mdash.Lib.error("Unable to read '#{filepath}' file (Error code: #{e.code}).", e)
-    return
+      if _.isObject(value)
+        if defaults[selector]? and _.isObject(defaults[selector])
+          value = _.defaults _.omit(value, 'selector'), _.omit(defaults[selector], 'disabled')
 
-  # Read a file, parse its contents, return an object.
-  readJSON: (filepath) ->
-    src = @readFile(filepath)
-    result = undefined
-    try
-      result = JSON.parse(src)
-      return result
-    catch e
-      Mdash.Lib.error("Unable to parse '#{filepath}' file (#{e.message}).", e)
-    return
+        if 'description' of value
+          delete value['description']
 
-  # Read a YAML file, parse its contents, return an object.
-  readYAML: (filepath) ->
-    src = @readFile(filepath)
-    result = undefined
-    try
-      result = YAML.load(src)
-      return result
-    catch e
-      Mdash.Lib.error("Unable to parse '#{filepath}' file (#{e.problem}).", e)
-    return
+        if 'hide' of value
+          delete value['hide']
+
+        if 'setting' of value
+          value[value.setting] = true
+          delete value['setting']
+
+        if 'disabled' not of value and value.length is 0
+          value.disabled = false
+
+        if 'selector' of value
+          value.selector = [value.selector]  if _.isString value.selector
+          val = _.omit(value, 'selector')
+
+          if _.size(value) > 2
+            if value['disabled'] is true
+              continue
+            else
+              val = _.omit(val, 'disabled')
+
+          for select in value.selector
+            settings[select] = _.extend {}, val, settings[select]
+          continue
+
+        value = _.omit(value, 'selector')
+
+      settings[selector] = _.extend {}, value, settings[selector]
+    settings
+
 
   ###
    * Установить настройки
    *
    * @param array $setupmap
   ###
-  setup: (setupmap={}) ->
-    return  if typeof setupmap isnt 'object'
-    
-    if 'map' of setupmap or 'maps' of setupmap
-      if setupmap.map?
-        ret.map = test.params.map
-        ret.disable = test.params.map_disable
-        ret.strict = test.params.map_strict
-        test.params.maps = [ret]
-        delete setupmap.map
-        delete setupmap.map_disable
-        delete setupmap.map_strict
+  setup: (options={}) ->
+    @settings = @prepare_settings(@all_options)
+    options = @prepare_settings(options, @all_options)
 
-      if Array.isArray(setupmap.maps)
-        for map in setupmap.maps
-          @set_enable_map map.map, (if map.disable? then map.disable else false), (if map.strict? then map.strict else false)
-      delete setupmap.maps
-    
-    @do_setup(k, v)  for k, v of setupmap
+    for selector, value of options
+      value = _.defaults(value, (@settings[selector] or {})) or {}
+      @settings[selector] = value   if _.size(value) > 0
+
+    for selector, value of @settings
+      ruleList = @select_rules selector
+
+      for tret in @get_trets_list()
+        tretShort = @get_short_tret(tret)
+        tretObj = @get_tret(tret)
+
+        for rule of tretObj.rules
+          if ruleList[tret]?[rule]? or ruleList[tretShort]?[rule]?
+            if value? and _.isObject(value)
+              for key, val of value
+
+                if key is "disabled" and val is true
+                  tretObj.disable_rule(rule)
+                  
+                  Mdash.Lib.log "setup() | Правило #{tret}.#{rule} отключено"
+                
+                if key is "enabled" and val is true
+                  tretObj.enable_rule(rule)
+                  
+                  Mdash.Lib.log "setup() | Правило #{tret}.#{rule} включено"
+
+                if key not in ["disabled", "enabled"]
+                  tretObj.set_rule(rule, key, val)
+                  tretObj.set(key, val)  if selector.match /([a-z0-9_\-\.]*)?(\*)/i
+
+                  Mdash.Lib.log "setup() | Параметр '#{key}: #{val}' установлен для правила #{tret}.#{rule}"
+
+        @tret_objects[tret] = tretObj
+
     return
 
+  ###
+   * Запустить типограф на выполнение
+   *
+  ###
+  format: (text, options=null) ->
+    @set_text(text)  if text?
+    @setup(options)  if options?
+    
+    @init()
+
+    Mdash.Lib.debug(this, 'init', @text)
+    
+    @text = @safe_blocks(@text, true)
+    Mdash.Lib.debug(this, 'safe_blocks', @text)
+    
+    @text = Mdash.Lib.safe_tag_chars(@text, true)
+    Mdash.Lib.debug(this, 'safe_tag_chars', @text)
+    
+    @text = Mdash.Lib.clear_special_chars(@text)
+    Mdash.Lib.debug(this, 'clear_special_chars', @text)
+
+    for tret in @get_trets_list()
+      # // если установлен режим разметки тэгов то выставим его
+      @tret_objects[tret].set_tag_layout_ifnotset(@use_layout)           if @use_layout_set
+      @tret_objects[tret].set_class_layout_prefix(@class_layout_prefix)  if @class_layout_prefix
+      
+      # // влючаем, если нужно
+      @tret_objects[tret].DEBUG = @DEBUG
+            
+      # // применяем трэт
+      @tret_objects[tret].set_text(@text)
+      @text = @tret_objects[tret].apply()
+
+    @text = Mdash.Lib.decode_internal_blocks(@text)
+    Mdash.Lib.debug(this, 'decode_internal_blocks', @text)
+    
+    if @is_on('dounicode')
+      Mdash.Lib.convert_html_entities_to_unicode(@text)
+    
+    @text = Mdash.Lib.safe_tag_chars(@text, false)
+    Mdash.Lib.debug(this, 'unsafe_tag_chars', @text)
+    
+    @text = @safe_blocks(@text, false)
+    Mdash.Lib.debug(this, 'unsafe_blocks', @text)
+    
+    if not @disable_notg_replace
+      repl = ['<span class="_notg_start"></span>', '<span class="_notg_end"></span>']
+      repl = ""  if @remove_notg
+      @text = @text.replace(['<notg>','</notg>'], repl)
+
+    @text.trim()
 
   ###
    * Запустить типограф со стандартными параметрами
@@ -689,6 +484,16 @@ class Mdash
   @format: (text, options={}) ->
     obj = new this(text, options)
     obj.format()
+
+  @get_trets_list: (short=false) ->
+    @::get_trets_list(short)
+
+  @get_rules_list: (mask) ->
+    @::get_rules_list(mask)
+
+
+
+
 
 
 

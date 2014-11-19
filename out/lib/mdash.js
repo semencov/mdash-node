@@ -1,9 +1,10 @@
-var Mdash, fs, path,
-  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+var Mdash, fs, path, _;
 
 path = require('path');
 
 fs = require('fs');
+
+_ = require('underscore');
 
 
 /*
@@ -23,131 +24,50 @@ process.on('uncaughtException', function(error) {
 Mdash = (function() {
   Mdash.prototype.text = null;
 
-  Mdash.prototype.trets = ['Mdash.Tret.Quote', 'Mdash.Tret.Dash', 'Mdash.Tret.Symbol', 'Mdash.Tret.Punctmark', 'Mdash.Tret.Number', 'Mdash.Tret.Space', 'Mdash.Tret.Abbr', 'Mdash.Tret.Nobr', 'Mdash.Tret.Date', 'Mdash.Tret.OptAlign', 'Mdash.Tret.Etc', 'Mdash.Tret.Text'];
+  Mdash.prototype.trets = [];
 
   Mdash.prototype.all_options = {
-    'Quote.quotes': {
-      description: 'Расстановка «кавычек-елочек» первого уровня',
-      selector: "Quote.*quote"
+    'Quote': {
+      no_bdquotes: true,
+      no_inches: true
     },
-    'Quote.quotation': {
-      description: 'Внутренние кавычки-лапки',
-      selector: "Quote",
-      setting: 'no_bdquotes',
-      reversed: true
-    },
-    'Dash.to_libo_nibud': 'direct',
-    'Dash.iz_za_pod': 'direct',
-    'Dash.ka_de_kas': 'direct',
-    'Nobr.super_nbsp': 'direct',
-    'Nobr.nbsp_in_the_end': 'direct',
-    'Nobr.phone_builder': 'direct',
-    'Nobr.ip_address': 'direct',
-    'Nobr.spaces_nobr_in_surname_abbr': 'direct',
-    'Nobr.nbsp_celcius': 'direct',
-    'Nobr.hyphen_nowrap_in_small_words': 'direct',
-    'Nobr.hyphen_nowrap': 'direct',
     'Nobr.nowrap': {
-      description: 'Nobr (по умолчанию) & nowrap',
-      disabled: true,
+      disabled: false,
       selector: '*',
-      setting: 'nowrap'
+      nowrap: true
     },
-    'Symbol.tm_replace': 'direct',
-    'Symbol.r_sign_replace': 'direct',
-    'Symbol.copy_replace': 'direct',
-    'Symbol.apostrophe': 'direct',
-    'Symbol.degree_f': 'direct',
-    'Symbol.arrows_symbols': 'direct',
-    'Symbol.no_inches': {
-      description: 'Расстановка дюйма после числа',
-      selector: "Quote",
-      setting: 'no_inches',
-      reversed: true
-    },
-    'Punctmark.auto_comma': 'direct',
-    'Punctmark.hellip': 'direct',
-    'Punctmark.fix_pmarks': 'direct',
-    'Punctmark.fix_excl_quest_marks': 'direct',
-    'Punctmark.dot_on_end': 'direct',
-    'Number.minus_between_nums': 'direct',
-    'Number.minus_in_numbers_range': 'direct',
-    'Number.auto_times_x': 'direct',
-    'Number.simple_fraction': 'direct',
-    'Number.math_chars': 'direct',
-    'Number.thinsp_between_number_triads': 'direct',
-    'Number.thinsp_between_no_and_number': 'direct',
-    'Number.thinsp_between_sect_and_number': 'direct',
-    'Date.years': 'direct',
-    'Date.mdash_month_interval': 'direct',
-    'Date.nbsp_and_dash_month_interval': 'direct',
-    'Date.nobr_year_in_date': 'direct',
-    'Space.many_spaces_to_one': 'direct',
-    'Space.clear_percent': 'direct',
     'Space.clear_before_after_punct': {
-      description: 'Удаление пробелов перед и после знаков препинания в предложении',
       selector: 'Space.remove_space_before_punctuationmarks'
     },
     'Space.autospace_after': {
-      description: 'Расстановка пробелов после знаков препинания',
       selector: 'Space.autospace_after_*'
     },
     'Space.bracket_fix': {
-      description: 'Удаление пробелов внутри скобок, а также расстановка пробела перед скобками',
       selector: ['Space.nbsp_before_open_quote', 'Punctmark.fix_brackets']
     },
-    'Abbr.nbsp_money_abbr': 'direct',
-    'Abbr.nobr_vtch_itd_itp': 'direct',
-    'Abbr.nobr_sm_im': 'direct',
-    'Abbr.nobr_acronym': 'direct',
-    'Abbr.nobr_locations': 'direct',
-    'Abbr.nobr_abbreviation': 'direct',
-    'Abbr.ps_pps': 'direct',
-    'Abbr.nbsp_org_abbr': 'direct',
-    'Abbr.nobr_gost': 'direct',
-    'Abbr.nobr_before_unit_volt': 'direct',
-    'Abbr.nbsp_before_unit': 'direct',
-    'OptAlign.all': {
-      description: 'Все настройки оптического выравнивания',
-      hide: true,
-      selector: 'OptAlign.*'
-    },
-    'OptAlign.oa_oquote': 'direct',
-    'OptAlign.oa_obracket_coma': 'direct',
-    'OptAlign.oa_oquote_extra': 'direct',
     'OptAlign.layout': {
+      selector: 'OptAlign.*',
       description: 'Inline стили или CSS'
     },
-    'Text.paragraphs': 'direct',
-    'Text.auto_links': 'direct',
-    'Text.email': 'direct',
-    'Text.breakline': 'direct',
-    'Text.no_repeat_words': 'direct',
     'Etc.unicode_convert': {
-      description: 'Преобразовывать html-сущности в юникод',
       selector: '*',
-      setting: 'dounicode',
-      disabled: false
+      dounicode: true,
+      disabled: true
     }
   };
 
   function Mdash(text, options) {
-    var key, mdashrc, mdashrc_path, val;
+    var mdashrc;
     if (options == null) {
       options = {};
     }
     this.DEBUG = false;
-    if (typeof text === 'object') {
+    if (_.isObject(text)) {
       options = text;
       text = null;
     }
-    mdashrc_path = path.dirname(require.main.filename) + "/.mdash";
-    mdashrc = this.readJSON(mdashrc_path) || this.readYAML(mdashrc_path) || {};
-    for (key in options) {
-      val = options[key];
-      mdashrc[key] = val;
-    }
-    options = mdashrc;
+    mdashrc = path.dirname(require.main.filename) + "/.mdash";
+    options = _.extend(Mdash.Lib.readJSON(mdashrc) || Mdash.Lib.readYAML(mdashrc) || {}, options);
     this.inited = false;
     this.text = text;
     this.tret_objects = {};
@@ -156,7 +76,6 @@ Mdash = (function() {
     this.use_layout_set = false;
     this.disable_notg_replace = false;
     this.remove_notg = false;
-    this.settings = {};
     this.blocks = [];
     this.setup(options);
     return;
@@ -195,7 +114,7 @@ Mdash = (function() {
    */
 
   Mdash.prototype.get_allsafe_blocks = function() {
-    return this.safe_blocks;
+    return this.blocks;
   };
 
 
@@ -208,11 +127,11 @@ Mdash = (function() {
 
   Mdash.prototype.remove_safe_block = function(id) {
     var block, k, _ref;
-    _ref = this.safe_blocks;
+    _ref = this.blocks;
     for (k in _ref) {
       block = _ref[k];
       if (block.id === id) {
-        delete this.safe_blocks[k];
+        delete this.blocks[k];
       }
     }
   };
@@ -227,7 +146,7 @@ Mdash = (function() {
 
   Mdash.prototype.add_safe_tag = function(tag) {
     var close, open;
-    open = Mdash.Lib.preg_quote("<", '/') + ("" + tag + "[^>]*?") + Mdash.Lib.preg_quote(">", '/');
+    open = Mdash.Lib.preg_quote("<" + tag + "[^>]*?>", '/');
     close = Mdash.Lib.preg_quote("</" + tag + ">", '/');
     this.push_safe_block(tag, open, close, tag);
     return true;
@@ -294,10 +213,6 @@ Mdash = (function() {
    * @return  string
    */
 
-  Mdash.prototype.decode_internal_blocks = function(text) {
-    return Mdash.Lib.decode_internal_blocks(text);
-  };
-
   Mdash.prototype.create_object = function(tret) {
     var obj;
     if (typeof tret === 'string') {
@@ -322,7 +237,7 @@ Mdash = (function() {
 
   Mdash.prototype.init = function() {
     var obj, tretName, _i, _len, _ref;
-    _ref = this.trets;
+    _ref = this.get_trets_list();
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       tretName = _ref[_i];
       if (this.tret_objects[tretName] != null) {
@@ -346,43 +261,6 @@ Mdash = (function() {
 
 
   /*
-   * Добавить Трэт, 
-   *
-   * @param mixed $class - имя класса трета, или сам объект
-   * @param string $altname - альтернативное имя, если хотим например иметь два одинаоковых терта в обработке
-   * @return unknown
-   */
-
-  Mdash.prototype.add_tret = function(tretClass, altname) {
-    var obj;
-    if (altname == null) {
-      altname = false;
-    }
-    if (typeof tretClass === 'object') {
-      if (!tretClass instanceof "Mdash.Tret") {
-        Mdash.Lib.error("You are adding Tret that doesn't inherit base class Mdash.Tret", tretClass);
-        return false;
-      }
-      tretClass.DEBUG = this.DEBUG;
-      this.tret_objects[(altname ? altname : tretClass.constructor.name)] = tretClass;
-      this.trets.push((altname ? altname : tretClass.constructor.name));
-      return true;
-    }
-    if (typeof tretClass === 'string') {
-      obj = this.create_object(tretClass);
-      if (obj == null) {
-        return false;
-      }
-      this.tret_objects[(altname ? altname : tretClass)] = obj;
-      this.trets.push((altname ? altname : tretClass));
-      return true;
-    }
-    Mdash.Lib.error("Чтобы добавить трэт необходимо передать имя или объект");
-    return false;
-  };
-
-
-  /*
    * Получаем ТРЕТ по идентификатору, т.е. заванию класса
    *
    * @param unknown_type $name
@@ -393,7 +271,7 @@ Mdash = (function() {
     if (this.tret_objects[name] != null) {
       return this.tret_objects[name];
     }
-    _ref = this.trets;
+    _ref = this.get_trets_list();
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       tret = _ref[_i];
       if (tret === name) {
@@ -422,63 +300,6 @@ Mdash = (function() {
 
 
   /*
-   * Запустить типограф на выполнение
-   *
-   */
-
-  Mdash.prototype.format = function(text, options) {
-    var repl, tret, _i, _len, _ref;
-    if (options == null) {
-      options = null;
-    }
-    if (text != null) {
-      this.set_text(text);
-    }
-    if (options != null) {
-      this.setup(options);
-    }
-    this.init();
-    Mdash.Lib.debug(this, 'init', this.text);
-    this.text = this.safe_blocks(this.text, true);
-    Mdash.Lib.debug(this, 'safe_blocks', this.text);
-    this.text = Mdash.Lib.safe_tag_chars(this.text, true);
-    Mdash.Lib.debug(this, 'safe_tag_chars', this.text);
-    this.text = Mdash.Lib.clear_special_chars(this.text);
-    Mdash.Lib.debug(this, 'clear_special_chars', this.text);
-    _ref = this.trets;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      tret = _ref[_i];
-      if (this.use_layout_set) {
-        this.tret_objects[tret].set_tag_layout_ifnotset(this.use_layout);
-      }
-      if (this.class_layout_prefix) {
-        this.tret_objects[tret].set_class_layout_prefix(this.class_layout_prefix);
-      }
-      this.tret_objects[tret].DEBUG = this.DEBUG;
-      this.tret_objects[tret].set_text(this.text);
-      this.text = this.tret_objects[tret].apply();
-    }
-    this.text = this.decode_internal_blocks(this.text);
-    Mdash.Lib.debug(this, 'decode_internal_blocks', this.text);
-    if (this.is_on('dounicode')) {
-      Mdash.Lib.convert_html_entities_to_unicode(this.text);
-    }
-    this.text = Mdash.Lib.safe_tag_chars(this.text, false);
-    Mdash.Lib.debug(this, 'unsafe_tag_chars', this.text);
-    this.text = this.safe_blocks(this.text, false);
-    Mdash.Lib.debug(this, 'unsafe_blocks', this.text);
-    if (!this.disable_notg_replace) {
-      repl = ['<span class="_notg_start"></span>', '<span class="_notg_end"></span>'];
-      if (this.remove_notg) {
-        repl = "";
-      }
-      this.text = this.text.replace(['<notg>', '</notg>'], repl);
-    }
-    return this.text.trim();
-  };
-
-
-  /*
    * Получить содержимое <style></style> при использовании классов
    * 
    * @param bool $list false - вернуть в виде строки для style или как массив
@@ -487,20 +308,20 @@ Mdash = (function() {
    */
 
   Mdash.prototype.get_style = function(list, compact) {
-    var arr, classname, clsname, k, res, str, tret, v, _i, _len, _ref;
+    var arr, classname, clsname, k, res, str, tret, tretObj, v, _i, _len, _ref;
     if (list == null) {
       list = false;
     }
     if (compact == null) {
       compact = false;
     }
-    this._init();
     res = {};
-    _ref = this.trets;
+    _ref = this.get_trets_list();
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       tret = _ref[_i];
-      arr = this.tret_objects[tret].classes;
-      if (!Array.isArray(arr)) {
+      tretObj = this.get_tret(tret);
+      arr = tretObj.classes;
+      if (!_.isArray(arr)) {
         continue;
       }
       for (classname in arr) {
@@ -554,182 +375,17 @@ Mdash = (function() {
 
 
   /*
-   * Включить/отключить правила, согласно карте
-   * Формат карты:
-   *    'Название трэта 1' => array ( 'правило1', 'правило2' , ...  )
-   *    'Название трэта 2' => array ( 'правило1', 'правило2' , ...  )
-   *
-   * @param array $map
-   * @param boolean $disable если ложно, то $map соотвествует тем правилам, которые надо включить
-   *                         иначе это список правил, которые надо выключить
-   * @param boolean $strict строго, т.е. те которые не в списку будут тоже обработаны
-   */
-
-  Mdash.prototype.set_enable_map = function(map, disable, strict) {
-    var list, tret, trets, tretx, _i, _len, _ref;
-    if (disable == null) {
-      disable = false;
-    }
-    if (strict == null) {
-      strict = true;
-    }
-    if (!Array.isArray(map)) {
-      return;
-    }
-    trets = [];
-    for (tret in map) {
-      list = map[tret];
-      tretx = this.get_tret(tret);
-      if (!tretx) {
-        Mdash.Lib.log("Трэт " + tret + " не найден при применении карты включаемых правил");
-        continue;
-      }
-      trets.push(tretx);
-      if (list === true) {
-        tretx.activate([], !disable, true);
-      } else if (typeof list === 'string') {
-        tretx.activate([list], disable, strict);
-      } else if (Array.isArray(list)) {
-        tretx.activate(list, disable, strict);
-      }
-    }
-    if (strict) {
-      _ref = this.trets;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        tret = _ref[_i];
-        if (__indexOf.call(this.tret_objects[tret], trets) >= 0) {
-          continue;
-        }
-        this.tret_objects[tret].activate([], disable, true);
-      }
-    }
-  };
-
-
-  /*
    * Установлена ли настройка
    *
    * @param string $key
    */
 
   Mdash.prototype.is_on = function(key) {
-    var kk;
-    if (this.settings[key] == null) {
+    var _ref, _ref1;
+    if (((_ref = this.settings["*"]) != null ? _ref[key] : void 0) == null) {
       return false;
     }
-    kk = this.settings[key];
-    return kk.toLowerCase() === "on" || kk === "1" || kk === true || kk === 1;
-  };
-
-
-  /*
-   * Установить настройку
-   *
-   * @param mixed $selector
-   * @param string $setting
-   * @param mixed $value
-   */
-
-  Mdash.prototype.doset = function(selector, key, value) {
-    var pa, rule_pattern, rulename, t1, tret, tret_obj, tret_pattern, v, _i, _len, _ref, _ref1, _ref2;
-    tret_pattern = false;
-    rule_pattern = false;
-    if (typeof selector === 'string') {
-      if (selector.indexOf(".") === -1) {
-        tret_pattern = selector;
-      } else {
-        pa = selector.split(".");
-        tret_pattern = pa[0];
-        pa.shift();
-        rule_pattern = pa.join(".");
-      }
-    }
-    tret_pattern = Mdash.Lib._process_selector_pattern(tret_pattern);
-    rule_pattern = Mdash.Lib._process_selector_pattern(rule_pattern);
-    if (selector === "*") {
-      this.settings[key] = value;
-    }
-    _ref = this.trets;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      tret = _ref[_i];
-      t1 = this.get_short_tret(tret);
-      if (!Mdash.Lib._test_pattern(tret_pattern, t1) && !Mdash.Lib._test_pattern(tret_pattern, tret)) {
-        continue;
-      }
-      tret_obj = this.get_tret(tret);
-      if (key === "active") {
-        _ref1 = tret_obj.rules;
-        for (rulename in _ref1) {
-          v = _ref1[rulename];
-          if (!Mdash.Lib._test_pattern(rule_pattern, rulename)) {
-            continue;
-          }
-          if (value.toLowerCase() === "on" || value === 1 || value === true || value === "1") {
-            tret_obj.enable_rule(rulename);
-          }
-          if (value.toLowerCase() === "off" || value === 0 || value === false || value === "0") {
-            tret_obj.disable_rule(rulename);
-          }
-        }
-      } else {
-        if (rule_pattern === false) {
-          tret_obj.set(key, value);
-        } else {
-          _ref2 = tret_obj.rules;
-          for (rulename in _ref2) {
-            v = _ref2[rulename];
-            if (!Mdash.Lib._test_pattern(rule_pattern, rulename)) {
-              continue;
-            }
-            tret_obj.set_rule(rulename, key, value);
-          }
-        }
-      }
-      this.tret_objects[tret] = tret_obj;
-    }
-  };
-
-
-  /*
-   * Установить настройки для тертов и правил
-   *  1. если селектор является массивом, то тогда утсановка правил будет выполнена для каждого
-   *     элемента этого массива, как отдельного селектора.
-   *  2. Если $key не является массивом, то эта настрока будет проставлена согласно селектору
-   *  3. Если $key массив - то будет задана группа настроек
-   *       - если $value массив , то настройки определяются по ключам из массива $key, а значения из $value
-   *       - иначе, $key содержит ключ-значение как массив  
-   *
-   * @param mixed $selector
-   * @param mixed $key
-   * @param mixed $value
-   */
-
-  Mdash.prototype.set = function(selector, key, value) {
-    var kk, val, vv, x, y, _i, _len;
-    if (value == null) {
-      value = false;
-    }
-    if (Array.isArray(selector)) {
-      for (_i = 0, _len = selector.length; _i < _len; _i++) {
-        val = selector[_i];
-        this.set(val, key, value);
-      }
-      return;
-    }
-    if (Array.isArray(key)) {
-      for (x in key) {
-        y = key[x];
-        if (Array.isArray(value)) {
-          kk = y;
-          vv = value[x];
-        } else {
-          kk = x;
-          vv = y;
-        }
-        this.set(selector, kk, vv);
-      }
-    }
-    this.doset(selector, key, value);
+    return (_ref1 = ("" + this.settings["*"][key]).toLowerCase()) === "on" || _ref1 === "true" || _ref1 === "1" || _ref1 === "direct";
   };
 
 
@@ -738,81 +394,136 @@ Mdash = (function() {
    *
    */
 
-  Mdash.prototype.get_trets_list = function() {
-    return this.trets;
+  Mdash.prototype.get_trets_list = function(short) {
+    if (short == null) {
+      short = false;
+    }
+    return _.chain(Object.keys(Mdash.Tret)).filter(function(name) {
+      return _.isEqual(Mdash.Tret[name].__super__, Mdash.Tret.prototype);
+    }).map(function(name) {
+      if (short) {
+        return name;
+      } else {
+        return "Mdash.Tret." + name;
+      }
+    }).value();
   };
 
-
-  /*
-   * Установка одной метанастройки
-   *
-   * @param string $name
-   * @param mixed $value
-   */
-
-  Mdash.prototype.do_setup = function(name, value) {
-    var settingname;
-    if (this.all_options[name] == null) {
-      return;
+  Mdash.prototype.get_rules_list = function(mask) {
+    var action, result, rule, tret, trets, _i, _len, _ref;
+    trets = this.get_trets_list(true);
+    result = {};
+    for (_i = 0, _len = trets.length; _i < _len; _i++) {
+      tret = trets[_i];
+      result[tret] = {};
+      _ref = Mdash.Tret[tret].prototype.rules;
+      for (rule in _ref) {
+        action = _ref[rule];
+        result[tret][rule] = !((action.disabled != null) && action.disabled) || ((action.enabled != null) && action.enabled) ? "on" : "off";
+      }
     }
-    if (typeof this.all_options[name] === 'string') {
-      this.set(name, "active", value);
-      return;
-    } else if (typeof this.all_options[name] === 'object') {
-      if (this.all_options[name].selector != null) {
-        settingname = "active";
-        if (this.all_options[name].setting != null) {
-          settingname = this.all_options[name].setting;
+    if (mask) {
+      return this.select_rules(mask, result);
+    } else {
+      return result;
+    }
+  };
+
+  Mdash.prototype.select_rules = function(mask, rules) {
+    var m, name, pattern, selected, _i, _len;
+    if (mask == null) {
+      mask = "*";
+    }
+    if (rules == null) {
+      rules = this.get_rules_list();
+    }
+    selected = {};
+    if (_.isString(mask)) {
+      mask = [mask];
+    }
+    for (_i = 0, _len = mask.length; _i < _len; _i++) {
+      m = mask[_i];
+      m = m.split(".");
+      name = m[0];
+      pattern = Mdash.Lib.process_selector_pattern(name);
+      _.map(Object.keys(rules), function(key) {
+        if (key.match(pattern)) {
+          selected[key] = rules[key];
         }
-        this.set(this.all_options[name].selector, settingname, value);
+      });
+      if (m.length > 1 && (selected[name] != null)) {
+        selected[name] = this.select_rules(m.slice(1).join("."), rules[name]);
       }
     }
-    if (name === "OptAlign.layout") {
-      if (value === "style") {
-        this.set_tag_layout(Mdash.Lib.LAYOUT_STYLE);
+    return selected;
+  };
+
+  Mdash.prototype.prepare_settings = function(options, defaults) {
+    var select, selector, settings, val, value, _i, _len, _ref, _ref1, _ref2;
+    if (options == null) {
+      options = {};
+    }
+    if (defaults == null) {
+      defaults = {};
+    }
+    if (!_.isObject(options)) {
+      return options;
+    }
+    settings = {};
+    for (selector in options) {
+      value = options[selector];
+      if ((_ref = ("" + value).toLowerCase()) === "on" || _ref === "true" || _ref === "1" || _ref === "direct") {
+        value = true;
       }
-      if (value === "class") {
-        this.set_tag_layout(Mdash.Lib.LAYOUT_CLASS);
+      if ((_ref1 = ("" + value).toLowerCase()) === "off" || _ref1 === "false" || _ref1 === "0") {
+        value = false;
       }
+      if (_.isBoolean(value)) {
+        value = {
+          disabled: value === false
+        };
+      }
+      if (_.isObject(value)) {
+        if ((defaults[selector] != null) && _.isObject(defaults[selector])) {
+          value = _.defaults(_.omit(value, 'selector'), _.omit(defaults[selector], 'disabled'));
+        }
+        if ('description' in value) {
+          delete value['description'];
+        }
+        if ('hide' in value) {
+          delete value['hide'];
+        }
+        if ('setting' in value) {
+          value[value.setting] = true;
+          delete value['setting'];
+        }
+        if (!('disabled' in value) && value.length === 0) {
+          value.disabled = false;
+        }
+        if ('selector' in value) {
+          if (_.isString(value.selector)) {
+            value.selector = [value.selector];
+          }
+          val = _.omit(value, 'selector');
+          if (_.size(value) > 2) {
+            if (value['disabled'] === true) {
+              continue;
+            } else {
+              val = _.omit(val, 'disabled');
+            }
+          }
+          _ref2 = value.selector;
+          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+            select = _ref2[_i];
+            settings[select] = _.extend({}, val, settings[select]);
+          }
+          continue;
+        }
+        value = _.omit(value, 'selector');
+      }
+      settings[selector] = _.extend({}, value, settings[selector]);
     }
-  };
-
-  Mdash.prototype.readFile = function(filepath) {
-    var contents, e;
-    contents = void 0;
-    try {
-      contents = fs.readFileSync(String(filepath));
-      return contents;
-    } catch (_error) {
-      e = _error;
-      Mdash.Lib.error("Unable to read '" + filepath + "' file (Error code: " + e.code + ").", e);
-    }
-  };
-
-  Mdash.prototype.readJSON = function(filepath) {
-    var e, result, src;
-    src = this.readFile(filepath);
-    result = void 0;
-    try {
-      result = JSON.parse(src);
-      return result;
-    } catch (_error) {
-      e = _error;
-      Mdash.Lib.error("Unable to parse '" + filepath + "' file (" + e.message + ").", e);
-    }
-  };
-
-  Mdash.prototype.readYAML = function(filepath) {
-    var e, result, src;
-    src = this.readFile(filepath);
-    result = void 0;
-    try {
-      result = YAML.load(src);
-      return result;
-    } catch (_error) {
-      e = _error;
-      Mdash.Lib.error("Unable to parse '" + filepath + "' file (" + e.problem + ").", e);
-    }
+    return settings;
   };
 
 
@@ -822,37 +533,113 @@ Mdash = (function() {
    * @param array $setupmap
    */
 
-  Mdash.prototype.setup = function(setupmap) {
-    var k, map, v, _i, _len, _ref;
-    if (setupmap == null) {
-      setupmap = {};
+  Mdash.prototype.setup = function(options) {
+    var key, rule, ruleList, selector, tret, tretObj, tretShort, val, value, _i, _len, _ref, _ref1, _ref2, _ref3;
+    if (options == null) {
+      options = {};
     }
-    if (typeof setupmap !== 'object') {
-      return;
-    }
-    if ('map' in setupmap || 'maps' in setupmap) {
-      if (setupmap.map != null) {
-        ret.map = test.params.map;
-        ret.disable = test.params.map_disable;
-        ret.strict = test.params.map_strict;
-        test.params.maps = [ret];
-        delete setupmap.map;
-        delete setupmap.map_disable;
-        delete setupmap.map_strict;
+    this.settings = this.prepare_settings(this.all_options);
+    options = this.prepare_settings(options, this.all_options);
+    for (selector in options) {
+      value = options[selector];
+      value = _.defaults(value, this.settings[selector] || {}) || {};
+      if (_.size(value) > 0) {
+        this.settings[selector] = value;
       }
-      if (Array.isArray(setupmap.maps)) {
-        _ref = setupmap.maps;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          map = _ref[_i];
-          this.set_enable_map(map.map, (map.disable != null ? map.disable : false), (map.strict != null ? map.strict : false));
+    }
+    _ref = this.settings;
+    for (selector in _ref) {
+      value = _ref[selector];
+      ruleList = this.select_rules(selector);
+      _ref1 = this.get_trets_list();
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        tret = _ref1[_i];
+        tretShort = this.get_short_tret(tret);
+        tretObj = this.get_tret(tret);
+        for (rule in tretObj.rules) {
+          if ((((_ref2 = ruleList[tret]) != null ? _ref2[rule] : void 0) != null) || (((_ref3 = ruleList[tretShort]) != null ? _ref3[rule] : void 0) != null)) {
+            if ((value != null) && _.isObject(value)) {
+              for (key in value) {
+                val = value[key];
+                if (key === "disabled" && val === true) {
+                  tretObj.disable_rule(rule);
+                  Mdash.Lib.log("setup() | Правило " + tret + "." + rule + " отключено");
+                }
+                if (key === "enabled" && val === true) {
+                  tretObj.enable_rule(rule);
+                  Mdash.Lib.log("setup() | Правило " + tret + "." + rule + " включено");
+                }
+                if (key !== "disabled" && key !== "enabled") {
+                  tretObj.set_rule(rule, key, val);
+                  if (selector.match(/([a-z0-9_\-\.]*)?(\*)/i)) {
+                    tretObj.set(key, val);
+                  }
+                  Mdash.Lib.log("setup() | Параметр '" + key + ": " + val + "' установлен для правила " + tret + "." + rule);
+                }
+              }
+            }
+          }
         }
+        this.tret_objects[tret] = tretObj;
       }
-      delete setupmap.maps;
     }
-    for (k in setupmap) {
-      v = setupmap[k];
-      this.do_setup(k, v);
+  };
+
+
+  /*
+   * Запустить типограф на выполнение
+   *
+   */
+
+  Mdash.prototype.format = function(text, options) {
+    var repl, tret, _i, _len, _ref;
+    if (options == null) {
+      options = null;
     }
+    if (text != null) {
+      this.set_text(text);
+    }
+    if (options != null) {
+      this.setup(options);
+    }
+    this.init();
+    Mdash.Lib.debug(this, 'init', this.text);
+    this.text = this.safe_blocks(this.text, true);
+    Mdash.Lib.debug(this, 'safe_blocks', this.text);
+    this.text = Mdash.Lib.safe_tag_chars(this.text, true);
+    Mdash.Lib.debug(this, 'safe_tag_chars', this.text);
+    this.text = Mdash.Lib.clear_special_chars(this.text);
+    Mdash.Lib.debug(this, 'clear_special_chars', this.text);
+    _ref = this.get_trets_list();
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      tret = _ref[_i];
+      if (this.use_layout_set) {
+        this.tret_objects[tret].set_tag_layout_ifnotset(this.use_layout);
+      }
+      if (this.class_layout_prefix) {
+        this.tret_objects[tret].set_class_layout_prefix(this.class_layout_prefix);
+      }
+      this.tret_objects[tret].DEBUG = this.DEBUG;
+      this.tret_objects[tret].set_text(this.text);
+      this.text = this.tret_objects[tret].apply();
+    }
+    this.text = Mdash.Lib.decode_internal_blocks(this.text);
+    Mdash.Lib.debug(this, 'decode_internal_blocks', this.text);
+    if (this.is_on('dounicode')) {
+      Mdash.Lib.convert_html_entities_to_unicode(this.text);
+    }
+    this.text = Mdash.Lib.safe_tag_chars(this.text, false);
+    Mdash.Lib.debug(this, 'unsafe_tag_chars', this.text);
+    this.text = this.safe_blocks(this.text, false);
+    Mdash.Lib.debug(this, 'unsafe_blocks', this.text);
+    if (!this.disable_notg_replace) {
+      repl = ['<span class="_notg_start"></span>', '<span class="_notg_end"></span>'];
+      if (this.remove_notg) {
+        repl = "";
+      }
+      this.text = this.text.replace(['<notg>', '</notg>'], repl);
+    }
+    return this.text.trim();
   };
 
 
@@ -871,6 +658,17 @@ Mdash = (function() {
     }
     obj = new this(text, options);
     return obj.format();
+  };
+
+  Mdash.get_trets_list = function(short) {
+    if (short == null) {
+      short = false;
+    }
+    return this.prototype.get_trets_list(short);
+  };
+
+  Mdash.get_rules_list = function(mask) {
+    return this.prototype.get_rules_list(mask);
   };
 
   return Mdash;
@@ -1025,8 +823,42 @@ Mdash.Lib = (function() {
     }
   };
 
-  Lib.isInt = function(num) {
-    return typeof num === "number" && isFinite(num) && num % 1 === 0;
+  Lib.readFile = function(filepath) {
+    var contents, e;
+    contents = void 0;
+    try {
+      contents = fs.readFileSync(String(filepath));
+      return contents;
+    } catch (_error) {
+      e = _error;
+      Mdash.Lib.error("Unable to read '" + filepath + "' file (Error code: " + e.code + ").", e);
+    }
+  };
+
+  Lib.readJSON = function(filepath) {
+    var e, result, src;
+    src = this.readFile(filepath);
+    result = void 0;
+    try {
+      result = JSON.parse(src);
+      return result;
+    } catch (_error) {
+      e = _error;
+      Mdash.Lib.error("Unable to parse '" + filepath + "' file (" + e.message + ").", e);
+    }
+  };
+
+  Lib.readYAML = function(filepath) {
+    var e, result, src;
+    src = this.readFile(filepath);
+    result = void 0;
+    try {
+      result = YAML.load(src);
+      return result;
+    } catch (_error) {
+      e = _error;
+      Mdash.Lib.error("Unable to parse '" + filepath + "' file (" + e.problem + ").", e);
+    }
   };
 
   Lib.preg_quote = function(str, delimiter) {
@@ -1093,13 +925,13 @@ Mdash.Lib = (function() {
     if (mode == null) {
       mode = null;
     }
-    if (typeof mode === 'string') {
+    if (_.isString(mode)) {
       mode = [mode];
     }
     if (mode == null) {
       mode = ['utf8', 'html'];
     }
-    if (!Array.isArray(mode)) {
+    if (!_.isArray(mode)) {
       return false;
     }
     moder = [];
@@ -1121,7 +953,7 @@ Mdash.Lib = (function() {
           _ref1 = vals[type];
           for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
             v = _ref1[_k];
-            if (type === 'utf8' && this.isInt(v)) {
+            if (type === 'utf8' && _.isFinite(v)) {
               v = this._getUnicodeChar(v);
             }
             if (type === 'html') {
@@ -1157,10 +989,10 @@ Mdash.Lib = (function() {
     }
     ignore = null;
     if (allowableTag != null) {
-      if (typeof allowableTag === 'string') {
+      if (_.isString(allowableTag)) {
         allowableTag = [allowableTag];
       }
-      if (Array.isArray(allowableTag)) {
+      if (_.isArray(allowableTag)) {
         tags = [];
         for (_i = 0, _len = allowableTag.length; _i < _len; _i++) {
           tag = allowableTag[_i];
@@ -1327,7 +1159,7 @@ Mdash.Lib = (function() {
     if (offset == null) {
       offset = null;
     }
-    if (Array.isArray(needle)) {
+    if (_.isArray(needle)) {
       m = -1;
       w = false;
       for (_i = 0, _len = needle.length; _i < _len; _i++) {
@@ -1357,13 +1189,13 @@ Mdash.Lib = (function() {
     return haystack.indexOf(needle, offset);
   };
 
-  Lib._process_selector_pattern = function(pattern) {
+  Lib.process_selector_pattern = function(pattern) {
     if (pattern === false) {
       return;
     }
     pattern = this.preg_quote(pattern, '/');
     pattern = pattern.replace("\\*", "[a-z0-9_\-]*");
-    return pattern = new RegExp(pattern, 'ig');
+    return pattern = new RegExp("^" + pattern + "$", 'ig');
   };
 
   Lib._test_pattern = function(pattern, text) {
@@ -1659,14 +1491,14 @@ Mdash.Lib = (function() {
 
   Lib.convert_html_entities_to_unicode = function(text) {
     text = text.replace(/\&#([0-9]+)\;/g, function(match, m) {
-      return _getUnicodeChar(parseInt(m));
+      return Mdash.Lib._getUnicodeChar(parseInt(m));
     });
     text = text.replace(/\&#x([0-9A-F]+)\;/g, function(match, m) {
-      return _getUnicodeChar(parseInt(m, 16));
+      return Mdash.Lib._getUnicodeChar(parseInt(m, 16));
     });
     text = text.replace(/\&([a-zA-Z0-9]+)\;/g, function(match, m) {
       var r;
-      r = html_char_entity_to_unicode(m);
+      r = Mdash.Lib.html_char_entity_to_unicode(m);
       return r || match;
     });
     return text;
@@ -1810,11 +1642,10 @@ Mdash.Tret = (function() {
   };
 
   Tret.prototype.getmethod = function(name) {
-    var _ref;
     if (!name) {
       return false;
     }
-    if (_ref = !name, __indexOf.call(this, _ref) >= 0) {
+    if (!name in this) {
       return false;
     }
     return this[name];
@@ -1874,13 +1705,13 @@ Mdash.Tret = (function() {
     }
     if (rule["function"] != null) {
       fn = rule["function"];
-      if (typeof fn === 'string') {
+      if (_.isString(fn)) {
         fn = this[fn];
-        if (typeof fn === 'string' && eval("typeof " + fn) === 'function') {
+        if (_.isString(fn) && _.isFunction(eval("typeof " + fn))) {
           fn = eval(fn);
         }
       }
-      if (typeof fn === 'function') {
+      if (_.isFunction(fn)) {
         Mdash.Lib.log("Правило " + name, "Используется метод " + rule["function"] + " в правиле");
         this.text = fn.call(this, this.text);
         return;
@@ -1889,19 +1720,19 @@ Mdash.Tret = (function() {
       return;
     } else if (rule.pattern != null) {
       patterns = rule.pattern;
-      if (typeof patterns === 'string') {
+      if (_.isString(patterns)) {
         patterns = new RegExp(Mdash.Lib.preg_quote(patterns, 'g'));
       }
-      if (!Array.isArray(patterns)) {
+      if (!_.isArray(patterns)) {
         patterns = [patterns];
       }
       for (k in patterns) {
         pattern = patterns[k];
-        if (typeof pattern === 'string') {
+        if (_.isString(pattern)) {
           pattern = new RegExp(Mdash.Lib.preg_quote(pattern, 'g'));
         }
-        replacement = Array.isArray(rule.replacement) ? rule.replacement[k] : rule.replacement;
-        if (typeof replacement === 'string' && /^[a-z_0-9]+$/i.test(replacement)) {
+        replacement = _.isArray(rule.replacement) ? rule.replacement[k] : rule.replacement;
+        if (_.isString(replacement) && /^[a-z_0-9]+$/i.test(replacement)) {
           Mdash.Lib.log("Правило " + name, "Замена с использованием replace с методом " + replacement);
           if ({}.hasOwnProperty.call(this, replacement)) {
             replacement = this[replacement];
@@ -1911,7 +1742,7 @@ Mdash.Tret = (function() {
           }
         }
         self = this;
-        this.text = this.text.replace(pattern, typeof replacement === 'string' ? replacement : function() {
+        this.text = this.text.replace(pattern, _.isString(replacement) ? replacement : function() {
           var match_all;
           match_all = arguments[0];
           return replacement.call(self, match_all, arguments);
@@ -2078,13 +1909,12 @@ Mdash.Tret = (function() {
    * @param string $key
    */
 
-  Tret.prototype.is_on = function(key) {
-    var kk;
-    if (this.settings[key] == null) {
+  Tret.prototype.is_on = function(key, rule) {
+    var _ref, _ref1, _ref2;
+    if ((this.settings[key] == null) && (((_ref = this.rules[rule]) != null ? _ref[key] : void 0) == null)) {
       return false;
     }
-    kk = this.settings[key];
-    return kk.toLowerCase() === "on" || kk === "1" || kk === true || kk === 1;
+    return (_ref1 = ("" + (this.settings[key] || ((_ref2 = this.rules[rule]) != null ? _ref2[key] : void 0))).toLowerCase()) === "on" || _ref1 === "1" || _ref1 === "true";
   };
 
 
@@ -2098,8 +1928,9 @@ Mdash.Tret = (function() {
   Tret.prototype.ss = function(key) {
     if (this.settings[key] == null) {
       return "";
+    } else {
+      return "" + this.settings[key];
     }
-    return "" + this.settings[key];
   };
 
 
@@ -2112,7 +1943,10 @@ Mdash.Tret = (function() {
    */
 
   Tret.prototype.set_rule = function(rulename, key, value) {
-    this.rules[rulename][key] = value;
+    var _ref;
+    if ((_ref = this.rules[rulename]) != null) {
+      _ref[key] = value;
+    }
   };
 
 
@@ -2132,7 +1966,7 @@ Mdash.Tret = (function() {
     if (strict == null) {
       strict = true;
     }
-    if (!Array.isArray(list)) {
+    if (!_.isArray(list)) {
       return false;
     }
     for (_i = 0, _len = list.length; _i < _len; _i++) {
@@ -2177,9 +2011,9 @@ Mdash.Tret = (function() {
     if (list == null) {
       list = null;
     }
-    if (typeof list === 'string') {
+    if (_.isString(list)) {
       rlist = [list];
-    } else if (Array.isArray(list)) {
+    } else if (_.isArray(list)) {
       rlist = list;
     } else {
       rlist = Object.keys(this.rules);
