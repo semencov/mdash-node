@@ -133,7 +133,7 @@ class Mdash.Lib
 
   @preg_quote = (str, delimiter) ->
     String str
-      .replace new RegExp('[.\\\\+*?\\[\\^\\]$(){}=!<>|:\\' + (delimiter || '') + '-]', 'g'), '\\$&'
+      .replace new RegExp('[.\\\\+*?\\[\\^\\]$(){}!|:\\' + (delimiter || '') + '-]', 'g'), '\\$&'
 
 
   @strip_tags = (input, allowed) ->

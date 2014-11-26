@@ -1,5 +1,5 @@
-path = require('path')
-fs = require('fs')
+path = require 'path'
+fs = require 'fs'
 
 _ = require 'underscore'
 
@@ -119,7 +119,7 @@ class Mdash
    * @return  void
   ###
   add_safe_tag: (tag) ->
-    open = Mdash.Lib.preg_quote("<#{tag}[^>]*?>", '/')
+    open = Mdash.Lib.preg_quote("<#{tag}", '/') + "[^>]*?" + Mdash.Lib.preg_quote(">", '/')
     close = Mdash.Lib.preg_quote("</#{tag}>", '/')
     @push_safe_block(tag, open, close, tag)
     return true
@@ -152,13 +152,14 @@ class Mdash
    * @param   bool $safe если true, то содержимое блоков будет сохранено, иначе - раскодировано. 
    * @return  string
   ###
-  safe_blocks: (text, way, show=true) ->
+  safe_blocks: (text, way) ->
     if @blocks.length
       safeblocks = if way is true then @blocks else @blocks.reverse()
 
       for block in safeblocks
-        text = text.replace new RegExp("({#{block.open}})(.+?)({#{block.close}})", 'g'), (match, m1, m2, m3) ->
-          m1 + (if way is true then Mdash.Lib.encrypt_tag(m2) else Mdash.Lib.decrypt_tag(m2)) + m3
+        pattern = new RegExp "(#{block.open})((?:.|\\n|\\r)*?)(#{block.close})", "ig"
+        text = text.replace pattern, ($0, $1, $2, $3) ->
+          $1 + (if way is true then Mdash.Lib.encrypt_tag($2) else Mdash.Lib.decrypt_tag($2)) + $3
 
     return text
     
@@ -197,6 +198,7 @@ class Mdash
     
     if not @inited
       @add_safe_tag('pre')
+      @add_safe_tag('code')
       @add_safe_tag('script')
       @add_safe_tag('style')
       @add_safe_tag('notg')
@@ -436,7 +438,7 @@ class Mdash
     
     @text = @safe_blocks(@text, true)
     Mdash.Lib.debug(this, 'safe_blocks', @text)
-    
+
     @text = Mdash.Lib.safe_tag_chars(@text, true)
     Mdash.Lib.debug(this, 'safe_tag_chars', @text)
     

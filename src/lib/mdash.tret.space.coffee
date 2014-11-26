@@ -40,7 +40,7 @@ class Mdash.Tret.Space extends Mdash.Tret
       ]
       replacement: [
         (match, m) -> "#{m[1]}#{m[2]}.#{(if m[5] is "." then "" else " ")}#{m[4]}#{m[5]}"
-        (match, m) -> "#{m[1]}#{m[2]}.#{(if m[3].toLowerCase() in @domain_zones then "" else if m[4] is "." then "" else " ")}#{m[3]}#{m[4]}"
+        (match, m) -> "#{m[1]}#{m[2]}.#{(if m[3].toLowerCase() in @domain_zones or /[a-z]{1,12}/.test(m[3].toLowerCase()) then "" else if m[4] in [".",",",";","!"] then "" else " ")}#{m[3]}#{m[4]}"
       ]
     autospace_after_hellips:
       description: 'Пробел после знаков троеточий с вопросительным или восклицательными знаками'

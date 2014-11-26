@@ -16,28 +16,21 @@ module.exports = (grunt) ->
         src: '<%= watch.gruntfile.files %>'
       lib:
         src: '<%= watch.lib.files %>'
-      test:
-        src: '<%= watch.test.files %>'
       options: grunt.file.readJSON('.coffeelintrc')
     coffee:
       options:
         bare: true
         expand: true
-        flatten: true
       lib:
+        cwd: 'src/'
         files:
-          'out/lib/mdash.js': [
+          'lib/mdash.js': [
             'src/lib/mdash.coffee'
             'src/lib/mdash.lib.coffee'
             'src/lib/mdash.tret.coffee'
             'src/lib/mdash.tret.*.coffee'
           ]
-      test:
-        expand: true
-        cwd: 'src/test/'
-        src: ['**/*.coffee']
-        dest: 'out/test/'
-        ext: '.js'
+
     simplemocha:
       all:
         src: [
@@ -50,6 +43,21 @@ module.exports = (grunt) ->
           ignoreLeaks: false
           ui: 'bdd'
           reporter: 'spec'
+
+    mochaTest:
+      spec:
+        options:
+          reporter: 'spec'
+          require: 'coffee-script/register'
+        src: ['test/**/*.coffee']
+      md:
+        options:
+          reporter: 'Markdown'
+          require: 'coffee-script/register'
+          quiet: true
+          captureFile: 'report.md'
+        src: ['test/**/*.coffee']
+
     watch:
       options:
         spawn: false
@@ -59,16 +67,13 @@ module.exports = (grunt) ->
       lib:
         files: ['src/lib/**/*.coffee']
         tasks: ['coffeelint:lib', 'coffee:lib']
-      test:
-        files: ['src/test/**/*.coffee']
-        tasks: ['coffeelint:test', 'coffee:test']
     clean: ['out/']
 
   grunt.event.on 'watch', (action, files, target) ->
     grunt.log.writeln "#{target}: #{files} has #{action}"
 
     # coffeelint
-    grunt.config ['coffeelint', target], src: files
+    # grunt.config ['coffeelint', target], src: files
 
     # coffee
     coffeeData = grunt.config ['coffee', target]
