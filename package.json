@@ -1,6 +1,6 @@
 {
   "name": "mdash-node",
-  "version": "0.2.4",
+  "version": "0.2.6",
   "main": "./lib/mdash",
   "description": "Evgeny Muravjev Typograph for Node.js",
   "keywords": [
@@ -38,7 +38,6 @@
     "grunt": "~0.4.2"
   },
   "dependencies": {
-    "js-base64": "^2.1.5",
     "underscore": "^1.7.0"
   }
 }

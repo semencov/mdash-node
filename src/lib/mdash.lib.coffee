@@ -1,4 +1,3 @@
-Base64 = require('js-base64').Base64
 
 class Mdash.Lib
   @DEBUG = false or Mdash.DEBUG
@@ -329,7 +328,7 @@ class Mdash.Lib
    * @return  string
   ###
   @encrypt_tag = (text) ->
-    Base64.encode text
+    new Buffer(text).toString('base64')
 
   ###
    * Метод, осуществляющий декодирование информации
@@ -338,7 +337,7 @@ class Mdash.Lib
    * @return  string
   ###
   @decrypt_tag = (text) ->
-    Base64.decode text
+    new Buffer(text, 'base64').toString('utf8')
     
     
   @strpos_ex = (haystack, needle, offset = null) ->

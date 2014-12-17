@@ -1,7 +1,6 @@
 path = require 'path'
 fs = require 'fs'
-
-_ = require 'underscore'
+_ = require('underscore')._
 
 ###
 * Evgeny Muravjev Typograph, http://mdash.ru
