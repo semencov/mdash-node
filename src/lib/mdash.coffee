@@ -486,7 +486,7 @@ class Mdash
     obj = new this(text, options)
     obj.format()
 
-  @get_trets_list: (short=false) ->
+  @get_trets_list: (short=true) ->
     @::get_trets_list(short)
 
   @get_rules_list: (mask) ->
