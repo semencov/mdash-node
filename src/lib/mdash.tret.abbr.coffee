@@ -90,12 +90,14 @@ class Mdash.Tret.Abbr extends Mdash.Tret
       pattern     : [
         /(\040|\t|\&nbsp\;|^)ГОСТ( |\&nbsp\;)?(\d+)((\-|\&minus\;|\&mdash\;)(\d+))?(( |\&nbsp\;)(\-|\&mdash\;))?/ig
         /(\040|\t|\&nbsp\;|^|\>)ГОСТ( |\&nbsp\;)?(\d+)(\-|\&minus\;|\&mdash\;)(\d+)/ig
-        /(\040|\t|\&nbsp\;|^|\>)LVS( |\&nbsp\;)?(\d+)(\:|\-|)(\d+)/ig  # правило для Латвии
+        /(\040|\t|\&nbsp\;|^|\>)LVS( |\&nbsp\;)?(\d+)(\:|\-|\&minus\;|\&mdash\;|)(\d+)/ig  # правило для Латвии
+        /(\040|\t|\&nbsp\;|^|\>)(RFC|ISO|IEEE)( |\&nbsp\;)?(\d+[.-\/]?\d?)/ig  # правило для международных стандартов
       ]
       replacement : [
         (match, m) -> m[1] + @tag("ГОСТ #{m[3]}" + (if m[6]? then "&ndash;" + m[6] else "") + (if m[7]? then " &mdash;" else ""), "span", {class:"nowrap"})
         (match, m) -> m[1] + "ГОСТ #{m[3]}&ndash;#{m[5]}"
         (match, m) -> m[1] + @tag("LVS #{m[3]}:#{m[5]}", "span", {class:"nowrap"})  # правило для Латвии
+        (match, m) -> m[1] + @tag("#{m[2]} #{m[4]}", "span", {class:"nowrap"})  # правило для международных стандартов
       ]
 
 

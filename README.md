@@ -130,10 +130,10 @@ Mdash.prototype.all_options = {
 You can specify global settings by putting simple JSON file `.mdash` in the root of your project:
 ```javascript
 {
-  'OptAlign.oa_obracket_coma': "off",
-  'Text.paragraphs': "off",
-  'Text.breakline': "off",
-  'Quote': "off"
+  "OptAlign.oa_obracket_coma": "off",
+  "Text.paragraphs": "off",
+  "Text.breakline": "off",
+  "Quote": "off"
 }
 ```
 This settings will override the default, but will be overriden by options you'll supply to instance.
