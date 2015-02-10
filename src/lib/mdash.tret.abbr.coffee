@@ -5,7 +5,7 @@ class Mdash.Tret.Abbr extends Mdash.Tret
   domain_zones: ['ru', 'ру', 'com', 'ком', 'org', 'орг', 'уа', 'ua', 'lv', 'lt', 'ee', 'eu']
   
   classes:
-    nowrap: 'word-spacing:nowrap;'
+    nowrap: 'white-space:nowrap;'
 
   rules:
     nobr_abbreviation:

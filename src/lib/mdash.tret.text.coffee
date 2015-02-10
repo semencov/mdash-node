@@ -3,7 +3,7 @@ class Mdash.Tret.Text extends Mdash.Tret
   title: "Текст и абзацы"
 
   classes:
-    nowrap: 'word-spacing:nowrap;'
+    nowrap: 'white-space:nowrap;'
 
   rules:
     auto_links:

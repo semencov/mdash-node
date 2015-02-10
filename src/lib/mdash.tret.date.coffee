@@ -4,7 +4,7 @@ class Mdash.Tret.Date extends Mdash.Tret
   title: "Даты и дни"
   
   classes:
-    nowrap: 'word-spacing:nowrap;'
+    nowrap: 'white-space:nowrap;'
 
   rules:
     years:

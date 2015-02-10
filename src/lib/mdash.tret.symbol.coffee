@@ -4,7 +4,7 @@ class Mdash.Tret.Symbol extends Mdash.Tret
   title: "Специальные символы"
 
   classes:
-    nowrap: 'word-spacing:nowrap;'
+    nowrap: 'white-space:nowrap;'
 
   rules:
     tm_replace:

@@ -5,7 +5,7 @@ class Mdash.Tret.Etc extends Mdash.Tret
   title: "Прочее"
   
   classes:
-    nowrap: 'word-spacing:nowrap;'
+    nowrap: 'white-space:nowrap;'
 
   rules:
     acute_accent:

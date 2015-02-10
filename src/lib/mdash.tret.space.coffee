@@ -7,7 +7,7 @@ class Mdash.Tret.Space extends Mdash.Tret
     'com', 'net', 'edu', 'gov', 'org', 'mil', 'int', 'info', 'biz', 'info', 'name', 'pro']
 
   classes:
-    nowrap: 'word-spacing:nowrap;'
+    nowrap: 'white-space:nowrap;'
 
   rules:
     nobr_twosym_abbr:

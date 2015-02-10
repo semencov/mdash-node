@@ -4,7 +4,7 @@ class Mdash.Tret.Nobr extends Mdash.Tret
   title: "Неразрывные конструкции"
   
   classes:
-    nowrap: 'word-spacing:nowrap;'
+    nowrap: 'white-space:nowrap;'
 
   rules:
     super_nbsp:
