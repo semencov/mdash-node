@@ -54,7 +54,7 @@ class Mdash
       options = text
       text = null
 
-    mdashrc = path.dirname(require.main.filename) + "/.mdash"
+    mdashrc = process.cwd() + "/.mdash"
     options = _.extend (Mdash.Lib.readJSON(mdashrc) or Mdash.Lib.readYAML(mdashrc) or {}), options
 
     @inited = false

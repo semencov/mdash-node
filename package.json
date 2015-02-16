@@ -1,6 +1,6 @@
 {
   "name": "mdash-node",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "main": "./lib/mdash",
   "description": "Evgeny Muravjev Typograph for Node.js",
   "keywords": [
