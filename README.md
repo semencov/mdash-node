@@ -6,7 +6,7 @@ This is Node.js port of the original Typograph ([http://mdash.ru](http://mdash.r
 Install the module with: `npm install mdash-node`
 
 ## Documentation
-Currently this is a "dirty" port from PHP library which fully immitates its behavior excluding debuging and custom builds. So you can check the original documentation on [http://mdash.ru](http://mdash.ru). Optimizations and improvements will follow. All formatting rules can be found on http://mdash.ru/rules.html (Russian).
+Currently this is a "dirty" port from PHP library which fully immitates its behavior excluding debuging and custom builds. So you can check the original documentation on [http://mdash.ru](http://mdash.ru). Optimizations and improvements will follow. All formatting rules can be found on [http://mdash.ru/rules.html](http://mdash.ru/rules.html) (Russian).
 
 ### Usage
 The lib can accept settings either with new instance or as args to the format method.
