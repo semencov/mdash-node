@@ -262,10 +262,11 @@ class Mdash.Lib
    * @param   string $text
    * @return  string
   ###
-  @decode_internal_blocks = (text) ->
+  @decode_internal_blocks = (text="") ->
     self = @
     text = text.replace new RegExp("#{@INTERNAL_BLOCK_OPEN}([a-zA-Z0-9\/=]+?)#{@INTERNAL_BLOCK_CLOSE}", 'g'), ($0, $1) ->
       self.decrypt_tag($1)
+    text
     
   ###
    * Кодирует спец блок
@@ -273,7 +274,7 @@ class Mdash.Lib
    * @param   string $text
    * @return  string
   ###
-  @iblock = (text) ->
+  @iblock = (text="") ->
     "#{@INTERNAL_BLOCK_OPEN}#{@encrypt_tag(text)}#{@INTERNAL_BLOCK_CLOSE}"
     
     
