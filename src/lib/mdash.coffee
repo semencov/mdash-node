@@ -451,7 +451,7 @@ class Mdash
       
       # // влючаем, если нужно
       @tret_objects[tret].DEBUG = @DEBUG
-            
+
       # // применяем трэт
       @tret_objects[tret].set_text(@text)
       @text = @tret_objects[tret].apply()
