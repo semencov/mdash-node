@@ -30,6 +30,17 @@ module.exports = (grunt) ->
             'src/lib/mdash.tret.coffee'
             'src/lib/mdash.tret.*.coffee'
           ]
+      alt:
+        cwd: 'src/'
+        files:
+          'lib/mdash_alt.js': [
+            'src/alt/mdash.coffee'
+            'src/alt/mdash.lib.coffee'
+            'src/alt/mdash.tret.coffee'
+            'src/alt/mdash.tret.*.coffee'
+            'src/alt/mdash.rule.coffee'
+          ]
+
 
     simplemocha:
       all:
@@ -67,21 +78,22 @@ module.exports = (grunt) ->
       lib:
         files: ['src/lib/**/*.coffee']
         tasks: ['coffeelint:lib', 'coffee:lib']
+
     clean: ['out/']
 
-  grunt.event.on 'watch', (action, files, target) ->
-    grunt.log.writeln "#{target}: #{files} has #{action}"
+  # grunt.event.on 'watch', (action, files, target) ->
+  #   grunt.log.writeln "#{target}: #{files} has #{action}"
 
-    # coffeelint
-    # grunt.config ['coffeelint', target], src: files
+  #   # coffeelint
+  #   # grunt.config ['coffeelint', target], src: files
 
-    # coffee
-    coffeeData = grunt.config ['coffee', target]
-    files = [files] if _.isString files
-    files = files.map (file) -> path.relative coffeeData.cwd, file
-    coffeeData.src = files
+  #   # coffee
+  #   coffeeData = grunt.config ['coffee', target]
+  #   files = [files] if _.isString files
+  #   files = files.map (file) -> path.relative coffeeData.cwd, file
+  #   coffeeData.src = files
 
-    grunt.config ['coffee', target], coffeeData
+  #   grunt.config ['coffee', target], coffeeData
 
   # tasks.
   grunt.registerTask 'compile', [
