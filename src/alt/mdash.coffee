@@ -2,13 +2,6 @@ path = require 'path'
 fs = require 'fs'
 _ = require('underscore')._
 
-###
-* Evgeny Muravjev Typograph, http://mdash.ru
-* Version: 3.0 Gold Master
-* Release Date: September 28, 2013
-* Authors: Evgeny Muravjev & Alexander Drutsa
-###
-
 process.on 'uncaughtException', (error) ->
   console.log "=[uncaughtException]====================================================="
   console.error error
@@ -28,7 +21,37 @@ debug = (obj, place, after_text, after_text_raw="") ->
   return
 
 
-class Mdash
+compact = (array) ->
+  item for item in array when item
+
+extend = (object, properties) ->
+  for key, val of properties
+    object[key] = val
+  object
+
+merge = (options, overrides) ->
+  extend (extend {}, options), overrides
+
+readFile = (filepath) ->
+  contents = undefined
+  result = undefined
+  try
+    contents = fs.readFileSync(String(filepath))
+    try
+      result = JSON.parse(contents)
+    catch e
+      try
+        result = YAML.load(contents)
+      catch e
+        error("Unable to parse '#{filepath}' file (#{e.problem}).", e)
+    return result
+  catch e
+    error("Unable to read '#{filepath}' file (Error code: #{e.code}).", e)
+  return
+
+
+
+module.exports = class Mdash
   text: null
   trets: {}
   
@@ -67,7 +90,7 @@ class Mdash
       text = null
 
     mdashrc = process.cwd() + "/.mdash"
-    options = _.extend (Mdash.Lib.readJSON(mdashrc) or Mdash.Lib.readYAML(mdashrc) or {}), options
+    options = merge (readFile(mdashrc) or {}), options
 
     @inited = false
     @text = text
@@ -405,56 +428,33 @@ class Mdash
       value = _.defaults(value, (@settings[selector] or {})) or {}
       @settings[selector] = value   if _.size(value) > 0
 
-    @init()  if not @inited
-    
+    settings = {}
+
     for selector, value of @settings
       ruleList = @selectRules selector
 
       for tret, rules of ruleList
-        tretObj = @trets[tret]
-        settings = {}
+        settings[tret] = {}  if not settings[tret]?
+        for rule, val of rules
+          if (value['disabled']) or settings[tret][rule]?['disabled']
+            settings[tret][rule] = {disabled: true}
+          else
+            settings[tret][rule] = (if settings[tret][rule]? then merge(settings[tret][rule], value) else value)
+      @settings = settings
 
-        settings[rule] = value  for rule of rules
-
-
-
-      #   tretShort = @get_short_tret(tret)
-      #   tretObj = @getTret(tret)
-
-      #   for rule of tretObj.rules
-      #     if ruleList[tret]?[rule]? or ruleList[tretShort]?[rule]?
-      #       if value? and _.isObject(value)
-      #         for key, val of value
-
-      #           if key is "disabled" and val is true
-      #             tretObj.disable_rule(rule)
-                  
-      #             log "setup() | Правило #{tret}.#{rule} отключено"
-                
-      #           if key is "enabled" and val is true
-      #             tretObj.enable_rule(rule)
-                  
-      #             log "setup() | Правило #{tret}.#{rule} включено"
-
-      #           if key not in ["disabled", "enabled"]
-      #             tretObj.set_rule(rule, key, val)
-      #             tretObj.set(key, val)  if selector.match /([a-z0-9_\-\.]*)?(\*)/i
-
-      #             log "setup() | Параметр '#{key}: #{val}' установлен для правила #{tret}.#{rule}"
-
-      #   @tret_objects[tret] = tretObj
-
-
+    @init()  if not @inited
+    # @trets[tret].set opts  for tret, opts of @settings
+    @trets[tret].set 'test', 'value'  for tret, opts of @settings
+      
     return
 
   ###
    * Запустить типограф на выполнение
    *
   ###
-  format: (text, options=null) ->
+  format: (text, options, callback) ->
     @setText(text)  if text?
     @setup(options)  if options?
-    
     
     @text = @safe_blocks(@text, true)
     debug(this, 'safe_blocks', @text)
@@ -496,6 +496,7 @@ class Mdash
 
     @text.trim()
 
+
   ###
    * Запустить типограф со стандартными параметрами
    *
@@ -503,8 +504,8 @@ class Mdash
    * @param array $options
    * @return string
   ###
-  @format: (text, options={}) ->
-    obj = new this(text, options)
+  @format: (text, options={}, callback) ->
+    obj = new this(text, options, callback)
     obj.format()
 
   @getTretNames: (short=true) ->
@@ -513,5 +514,3 @@ class Mdash
   @getRuleNames: (mask) ->
     @::getRuleNames(mask)
 
-
-module.exports = Mdash

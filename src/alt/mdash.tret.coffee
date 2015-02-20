@@ -115,6 +115,27 @@ class Mdash.Tret
 
   #   return
 
+  set: () ->
+    argn = arguments.length
+    settings = {}
+    # argn = Object.keys(arguments).length
+    if arguments.length >= 3
+      [rule, key, value] = arguments
+      
+      settings[rule][key] = value
+    else if arguments.length is 2
+      [key, value] = arguments
+
+      for rule of @rules
+        settings[rule] = {}  if not settings[rule]?
+        settings[rule][key] = value
+    else if arguments.length is 1 and typeof arguments[0] is 'object'
+      settings = arguments[0]
+
+    @settings = merge @settings, settings
+    return
+
+
   apply: (text) ->
     text = @[rule].apply(text)  for rule in Object.getOwnPropertyNames(this)
     text
