@@ -84,40 +84,6 @@ class Mdash.Lib
   ###
   @typographSpecificTagId = false
 
-
-  # Read a file, return its contents.
-  @readFile: (filepath) ->
-    contents = undefined
-    try
-      contents = fs.readFileSync(String(filepath))
-      return contents
-    catch e
-      error("Unable to read '#{filepath}' file (Error code: #{e.code}).", e)
-    return
-
-  # Read a file, parse its contents, return an object.
-  @readJSON: (filepath) ->
-    src = @readFile(filepath)
-    result = undefined
-    try
-      result = JSON.parse(src)
-      return result
-    catch e
-      error("Unable to parse '#{filepath}' file (#{e.message}).", e)
-    return
-
-  # Read a YAML file, parse its contents, return an object.
-  @readYAML: (filepath) ->
-    src = @readFile(filepath)
-    result = undefined
-    try
-      result = YAML.load(src)
-      return result
-    catch e
-      error("Unable to parse '#{filepath}' file (#{e.problem}).", e)
-    return
-
-
   @preg_quote = (str, delimiter) ->
     String str
       .replace new RegExp('[.\\\\+*?\\[\\^\\]$(){}!|:\\' + (delimiter || '') + '-]', 'g'), '\\$&'
