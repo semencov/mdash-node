@@ -4,19 +4,11 @@ class Mdash.Tret
   settings: {}
   
   
-  ###
-   * Защищенные теги
-   * 
-   * @todo привязать к методам из Jare_Typograph_Tool
-  ###
   BASE64_PARAGRAPH_TAG : 'cA==' # // p
   BASE64_BREAKLINE_TAG : 'YnIgLw==' # // br / (с пробелом и слэшем)
   BASE64_NOBR_OTAG     : 'bm9icg==' # // nobr
   BASE64_NOBR_CTAG     : 'L25vYnI=' # // /nobr
   
-  ###
-   * Типы кавычек
-  ###
   QUOTE_FIRS_OPEN    : '&laquo;'
   QUOTE_FIRS_CLOSE   : '&raquo;'
   QUOTE_CRAWSE_OPEN  : '&bdquo;'
@@ -31,85 +23,23 @@ class Mdash.Tret
     self = @
 
     for id, rule of @rules
-      self[id] = (text, opts={}) ->
-        self[id].disabled = false
-        self[id].patterns = []
-        self[id].replacement = null
-        self[id].function = null
+      if rule.function?
+        result = rule.function.call self, text
+        if typeof result isnt 'string'
+          throw new Error("Custom function returned wrong result")
+          return text
+        return result
 
-        settings = rule
-        settings[key] = val  for key, val of self.settings[id]  if self.settings[id]?
-        settings[key] = val  for key, val of opts
+      if rule.patterns?
+        for k, pattern of rule.patterns
+          replacement = if typeof rule.replacement is 'object' then (rule.replacement[k] or rule.replacement[0]) else rule.replacement
 
-        if settings.disabled?
-          self[id].disabled = "#{settings.disabled}".toLowerCase() in ["1", "true"]
-          delete settings['disabled']
-          
-        if settings.enabled?
-          self[id].disabled = "#{settings.enabled}".toLowerCase() in ["0", "false", "off"]
-          delete settings['enabled']
+          result = text.replace pattern, if typeof replacement is 'string' then replacement else () ->
+            eval("GLOBAL['$#{i}'] = '#{arguments[i]}';")  for i in [0...arguments.length]
+            replacement.call self.tret
 
-        if settings.order?
-          self[id].order = parseInt(settings.order) or 5
-          delete settings['order']
-
-        if settings.function?
-          fn = settings.function
-
-          if typeof fn is 'string'
-            fn = self[id][fn]  if self[id][fn]?
-            fn = self[fn]  if self[fn]?
-            fn = eval(fn)  if eval("typeof " + fn) is 'function'
-
-          self[id].function = fn  if typeof fn is 'function'
-          delete settings['function']
-
-        if settings.pattern?
-          pattern = settings.pattern
-          pattern = [ pattern ]  if not Array.isArray pattern
-          self[id].patterns = pattern
-          delete settings['pattern']
-
-        if settings.replacement?
-          replacement = settings.replacement
-
-          if typeof replacement is 'string' and /^[a-z_0-9]+$/i.test(replacement)
-            replacement = self[id][replacement]  if self[id][replacement]? and typeof self[id][replacement] is 'function'
-            replacement = self[replacement]  if self[replacement]? and typeof self[replacement] is 'function'
-            replacement = eval(replacement)  if eval("typeof " + replacement) is 'function'
-
-          self[id].replacement = replacement
-          delete settings['replacement']
-
-        self[id][key] = val  for key, val of settings
-
-        if self[id].patterns.length and not self[id].replacement? and not self[id].function?
-          throw new Error("There is no replacement setted for the patterns")
-          
-
-        # Processing format
-        return text  if self[id].disabled
-        self = this
-
-        if self[id].function?
-          result = self[id].function.call self, text
-          if typeof result isnt 'string'
-            throw new Error("Custom function returned wrong result")
-            return text
-          return result
-
-        if self[id].patterns?
-          for k, pattern of self[id].patterns
-            replacement = if typeof self[id].replacement is 'object' then (self[id].replacement[k] or self[id].replacement[0]) else self[id].replacement
-
-            result = text.replace pattern, if typeof replacement is 'string' then replacement else () ->
-              eval("GLOBAL['$#{i}'] = '#{arguments[i]}';")  for i in [0...arguments.length]
-              replacement.call self.tret
-
-            text = result  if typeof result is 'string'
-        text
-
-    return
+          text = result  if typeof result is 'string'
+    text
 
   set: () ->
     argn = arguments.length
@@ -128,13 +58,74 @@ class Mdash.Tret
     else if arguments.length is 1 and typeof arguments[0] is 'object'
       settings = arguments[0]
 
-    @settings = merge @settings, settings
 
-    # TODO: apply settings to rules
+    for id, rule of @rules
+      continue  if not settings[id]?
+
+      opts = rule
+      opts = merge opts, settings[id]  if settings[id]?
+
+      rule = {}
+      rule.disabled = false  if not rule.disabled?
+      rule.pattern = []  if not rule.pattern?
+      rule.replacement = null  if not rule.replacement?
+      rule.function = null  if not rule.function?
+
+      if opts.disabled?
+        rule.disabled = "#{opts.disabled}".toLowerCase() in ["1", "true"]
+        delete opts['disabled']
+
+      if opts.enabled?
+        rule.disabled = "#{opts.enabled}".toLowerCase() in ["0", "false", "off"]
+        delete opts['enabled']
+        
+      if opts.order?
+        rule.order = parseInt(opts.order) or 5
+        delete opts['order']
+
+      if opts.function?
+        fn = opts.function
+
+        if typeof fn is 'string'
+          fn = @[fn]  if @[fn]?
+          fn = eval(fn)  if eval("typeof " + fn) is 'function'
+
+        rule.function = fn  if typeof fn is 'function'
+        delete opts['function']
+
+      if opts.pattern?
+        pattern = opts.pattern
+        pattern = [ pattern ]  if not Array.isArray pattern
+        rule.pattern = pattern
+        delete opts['pattern']
+
+      if opts.replacement?
+        replacement = opts.replacement
+
+        if typeof replacement is 'string' and /^[a-z_0-9]+$/i.test(replacement)
+          replacement = @[replacement]  if @[replacement]? and typeof @[replacement] is 'function'
+          replacement = eval(replacement)  if eval("typeof " + replacement) is 'function'
+
+        rule.replacement = replacement
+        delete opts['replacement']
+
+      rule[key] = val  for key, val of opts
+
+      if rule.pattern.length and not rule.replacement? and not rule.function?
+        throw new Error("There is no replacement setted for the patterns")
+
+      @rules[id] = rule
 
     return
 
 
+  disable: (name) ->
+    @rules[name].disabled = true  if @rules[name]?
+    return
   
+  enable: (name) ->
+    @rules[name].disabled = false  if @rules[name]?
+    return
+
   
   
