@@ -2,7 +2,6 @@ path = require 'path'
 fs = require 'fs'
 _ = require('underscore')._
 
-debug = false
 mdashrc = path.join process.cwd(), ".mdash"
 
 process.on 'uncaughtException', (error) ->
@@ -109,76 +108,6 @@ module.exports = class Mdash
     @setup options
     return
 
-  # ###
-  #  * Добавление защищенного блока
-  #  *
-  #  * <code>
-  #  *  Jare_Typograph_Tool::addCustomBlocks('<span>', '</span>');
-  #  *  Jare_Typograph_Tool::addCustomBlocks('\<nobr\>', '\<\/span\>', true);
-  #  * </code>
-  #  * 
-  #  * @param   string $id идентификатор
-  #  * @param   string $open начало блока
-  #  * @param   string $close конец защищенного блока
-  #  * @param   string $tag тэг
-  #  * @return  void
-  # ###
-  # pushSafeBlock: (id, open, close, tag) ->
-  #   @blocks.push {id: id, tag: tag, open: open, close: close}
-  #   return
-    
-  # ###
-  #  * Список защищенных блоков
-  #  *
-  #  * @return  array
-  # ###
-  # get_allsafe_blocks: () ->
-  #   @blocks
-    
-  # ###
-  #  * Удаленного блока по его номеру ключа
-  #  *
-  #  * @param   string $id идентифиактор защищённого блока 
-  #  * @return  void
-  # ###
-  # remove_safe_block: (id) ->
-  #   for k, block of @blocks
-  #     delete @blocks[k]  if block.id is id
-  #   return
-    
-    
-  # ###
-  #  * Добавление защищенного блока
-  #  *
-  #  * @param   string $tag тэг, который должен быть защищён
-  #  * @return  void
-  # ###
-  # addSafeTag: (tag) ->
-  #   open = Mdash.Lib.preg_quote("<#{tag}", '/') + "[^>]*?" + Mdash.Lib.preg_quote(">", '/')
-  #   close = Mdash.Lib.preg_quote("</#{tag}>", '/')
-  #   @pushSafeBlock(tag, open, close, tag)
-  #   return true
-    
-  # ###
-  #  * Добавление защищенного блока
-  #  *
-  #  * @param   string $open начало блока
-  #  * @param   string $close конец защищенного блока
-  #  * @param   bool $quoted специальные символы в начале и конце блока экранированы
-  #  * @return  void
-  # ###
-  # addSafeBlock: (id, open, close, quoted=false) ->
-  #   open = open.trim()
-  #   close = close.trim()
-    
-  #   return false  if not open? or not close?
-    
-  #   if quoted is false
-  #     open = Mdash.Lib.preg_quote(open, '/')
-  #     close = Mdash.Lib.preg_quote(close, '/')
-    
-  #   @pushSafeBlock id, open, close, ""
-  #   return true
     
   ###
    * Сохранение содержимого защищенных блоков
@@ -523,23 +452,9 @@ module.exports = class Mdash
     @setup(options)  if options? and typeof options is 'object'
     
     @text = @before @text
-
-    for tretName, tretObj of @trets
-      @text = tretObj.apply @text
-
-    # for tret in @getTretNames()
-    #   # // если установлен режим разметки тэгов то выставим его
-    #   @tret_objects[tret].set_tag_layout_ifnotset(@use_layout)           if @use_layout_set
-    #   @tret_objects[tret].set_class_layout_prefix(@class_layout_prefix)  if @class_layout_prefix
-      
-    #   # // влючаем, если нужно
-    #   @tret_objects[tret].DEBUG = @DEBUG
-
-    #   # // применяем трэт
-    #   @tret_objects[tret].setText(@text)
-    #   @text = @tret_objects[tret].apply()
-
+    @text = tretObj.apply @text  for tretName, tretObj of @trets
     @text = @after @text
+
     @text
 
 
