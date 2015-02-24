@@ -2,18 +2,8 @@ class Mdash.Tret
   rules: {}
   classes: {}
   settings: {}
+  order: 5
   
-  
-  BASE64_PARAGRAPH_TAG : 'cA==' # // p
-  BASE64_BREAKLINE_TAG : 'YnIgLw==' # // br / (с пробелом и слэшем)
-  BASE64_NOBR_OTAG     : 'bm9icg==' # // nobr
-  BASE64_NOBR_CTAG     : 'L25vYnI=' # // /nobr
-  
-  QUOTE_FIRS_OPEN    : '&laquo;'
-  QUOTE_FIRS_CLOSE   : '&raquo;'
-  QUOTE_CRAWSE_OPEN  : '&bdquo;'
-  QUOTE_CRAWSE_CLOSE : '&ldquo;'
-
   
   constructor: (options) ->
     @set options  if options? and typeof options is 'objects'
@@ -22,21 +12,30 @@ class Mdash.Tret
   apply: (text) ->
     self = @
 
+    log "Running tret #{@constructor.name}...".bgGreen.black
+
     for id, rule of @rules
+      log "Running rule #{id}...".green
+      log "Rule #{id} is disabled.".grey  if rule.disabled
+      continue  if rule.disabled
+
       if rule.function?
         result = rule.function.call self, text
+        log "Rule #{id} has custom function"
         if typeof result isnt 'string'
           throw new Error("Custom function returned wrong result")
           return text
         return result
 
-      if rule.patterns?
-        for k, pattern of rule.patterns
+      if rule.pattern?
+        for k, pattern of rule.pattern
           replacement = if typeof rule.replacement is 'object' then (rule.replacement[k] or rule.replacement[0]) else rule.replacement
 
           result = text.replace pattern, if typeof replacement is 'string' then replacement else () ->
-            eval("GLOBAL['$#{i}'] = '#{arguments[i]}';")  for i in [0...arguments.length]
-            replacement.call self.tret
+            global["$#{i}"] = arguments[i]  for i in [0...arguments.length]
+
+            log "Rule #{id} match pattern ##{k}\t'#{$0}'\t\t'" + replacement.call(self) + "'"
+            replacement.call self
 
           text = result  if typeof result is 'string'
     text
@@ -118,6 +117,9 @@ class Mdash.Tret
 
     return
 
+  is_on: (key) ->
+    return false  if not @rules[key]?
+    "#{@rules[key]}".toLowerCase() in ["on", "true", "1", "direct"]
 
   disable: (name) ->
     @rules[name].disabled = true  if @rules[name]?
@@ -127,5 +129,54 @@ class Mdash.Tret
     @rules[name].disabled = false  if @rules[name]?
     return
 
+  tag: (content, tag='span', attribute={}) ->
+    if attribute.class?
+      classname = attribute.class
+      if classname is "nowrap"
+        if not @is_on('nowrap')
+          tag = "nobr"
+          attribute = {}
+          classname = ""
+
+      if @classes[classname]?
+        style_inline = @classes[classname]
+        attribute.__style = style_inline  if style_inline
+
+      # classname = if @class_names[classname]? then @class_names[classname] else classname
+      classname = (if @class_layout_prefix then @class_layout_prefix else "") + classname
+      attribute.class = classname
+    
+    layout = if @use_layout is false then Mdash.Lib.LAYOUT_STYLE else @use_layout
+
+    htmlTag = tag
   
-  
+    if @typographSpecificTagId
+      if attribute.id?
+        attribute.id = 'emt-2' + Math.floor(Math.random() * (9999 - 1000)) + 1000
+    
+    classname = ""
+    if Object.keys(attribute).length
+      if layout is Mdash.Lib.LAYOUT_STYLE
+        if attribute.__style?
+          if attribute.style?
+            st = attribute.style.trim()
+            st += ";"  if st.slice(-1) not ";"
+            st += attribute.__style
+            attribute.style = st
+          else
+            attribute.style = attribute.__style
+          delete attribute.__style
+
+      for attr, value of attribute
+        continue  if attr is "__style"
+        
+        if attr is "class"
+          classname = value
+          continue
+
+        htmlTag += " #{attr}=\"#{value}\""
+      
+    if layout is Mdash.Lib.LAYOUT_CLASS and classname
+      htmlTag += " class=\"#{classname}\""
+    
+    "<" + Mdash.Lib.encrypt_tag(htmlTag) + ">#{content}</" + Mdash.Lib.encrypt_tag(tag) + ">"

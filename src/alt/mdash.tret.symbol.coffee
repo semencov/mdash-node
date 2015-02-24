@@ -1,46 +1,71 @@
 # Mdash.Tret = require "./mdash.tret"
 
 class Mdash.Tret.Symbol extends Mdash.Tret
-  title: "Специальные символы"
 
   classes:
     nowrap: 'white-space:nowrap;'
 
   rules:
+
+    # Замена (tm) на символ торговой марки
     tm_replace:
-      description: 'Замена (tm) на символ торговой марки'
-      pattern: /([\040\t])?\(tm\)/ig
-      replacement: '&trade;'
+      pattern: [
+        /([\040\t])?\(tm\)/ig
+      ]
+      replacement: [
+        -> "&trade;"
+      ]
+
+    # Замена (R) на символ зарегистрированной торговой марки
     r_sign_replace:
-      description: 'Замена (R) на символ зарегистрированной торговой марки'
-      pattern: /(.|^)\(r\)(.|$)/ig
-      replacement: '$1&reg;$2'
+      pattern: [
+        /(.|^)\(r\)(.|$)/ig
+      ]
+      replacement: [
+        -> "#{$1}&reg;#{$2}"
+      ]
+
+    # Замена (c) на символ копирайт
     copy_replace:
-      description: 'Замена (c) на символ копирайт'
-      pattern:[
+      pattern: [
         /\((c|с)\)\s+/ig
         /\((c|с)\)($|\.|,|!|\?)/ig
       ]
       replacement: [
-        '&copy;&nbsp;'
-        '&copy;$2'
+        -> "&copy;&nbsp;"
+        -> "&copy;#{$2}"
       ]
+
+    # Расстановка правильного апострофа в текстах
     apostrophe:
-      description: 'Расстановка правильного апострофа в текстах'
-      pattern: /(\s|^|\>|\&rsquo\;)([a-zа-яё]{1,})\'([a-zа-яё]+)/gi
-      replacement: '$1$2&rsquo;$3'
+      pattern: [
+        /(\s|^|\>|\&rsquo\;)([a-zа-яё]{1,})\'([a-zа-яё]+)/gi
+      ]
+      replacement: [
+        -> "#{$1}#{$2}&rsquo;#{$3}"
+      ]
       cycled: true
+
+    # Градусы по Фаренгейту
     degree_f:
-      description: 'Градусы по Фаренгейту'
-      pattern: /([0-9]+)F($|\s|\.|\,|\;|\:|\&nbsp\;|\?|\!)/g
-      replacement: (match, m) -> @tag("#{m[1]} &deg;F", "span", {class: "nowrap"}) + m[2]
+      pattern: [
+        /([0-9]+)F($|\s|\.|\,|\;|\:|\&nbsp\;|\?|\!)/g
+      ]
+      replacement: [
+        -> @tag("#{$1} &deg;F", "span", {class: "nowrap"}) + $2
+      ]
+
+    # Символ евро
     euro_symbol:
-      description: 'Символ евро'
-      simple_replace: true
-      pattern: '€'
-      replacement: '&euro;'
+      pattern: [
+        '/€/g'
+      ]
+      replacement: [
+        -> "&euro;"
+      ]
+
+    # Замена стрелок вправо-влево на html коды
     arrows_symbols:
-      description: 'Замена стрелок вправо-влево на html коды'
       pattern: [
         /(\s|\>|\&nbsp\;|^)\-\>($|\s|\&nbsp\;|\<)/g
         /(\s|\>|\&nbsp\;|^|;)\<\-(\s|\&nbsp\;|$)/g
@@ -48,9 +73,9 @@ class Mdash.Tret.Symbol extends Mdash.Tret
         /←/g
       ]
       replacement: [
-        '$1&rarr;$2'
-        '$1&larr;$2'
-        '&rarr;'
-        '&larr;'
+        -> "#{$1}&rarr;#{$2}"
+        -> "#{$1}&larr;#{$2}"
+        -> "&rarr;"
+        -> "&larr;"
       ]
 

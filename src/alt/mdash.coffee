@@ -1,6 +1,20 @@
+###
+
+mdash
+https://github.com/semencov/mdash
+
+Copyright (c) 2015 Yuri Sementsov
+Licensed under the MIT license.
+
+###
+
+'use strict'
+
 path = require 'path'
 fs = require 'fs'
 _ = require('underscore')._
+
+colors = require('colors')
 
 mdashrc = path.join process.cwd(), ".mdash"
 
@@ -11,7 +25,7 @@ process.on 'uncaughtException', (error) ->
   console.log "========================================================================="
 
 log = (str, data=null) ->
-  console.log("LOG\t #{@constructor.name}\t\t\t", str, data)
+  if data? then console.log("LOG\t", str, data) else console.log("LOG\t", str)
   return
 
 error = (info, data=null) ->
@@ -40,13 +54,9 @@ readFile = (filepath) ->
     contents = fs.readFileSync(String(filepath))
     try
       result = JSON.parse(contents)
-      log "Found .mdash file in JSON format.", result
+      log "Found .mdash file with settings.", result
     catch e
-      try
-        result = YAML.load(contents)
-        log "Found .mdash file in YAML format.", result
-      catch e
-        return
+      return
     return result
   catch e
     return
@@ -110,24 +120,6 @@ module.exports = class Mdash
 
     
   ###
-   * Сохранение содержимого защищенных блоков
-   *
-   * @param   string $text
-   * @param   bool $safe если true, то содержимое блоков будет сохранено, иначе - раскодировано. 
-   * @return  string
-  ###
-  safe_blocks: (text, way) ->
-    if @blocks.length
-      safeblocks = if way is true then @blocks else @blocks.reverse()
-
-      for block in safeblocks
-        pattern = new RegExp "(#{block.open})((?:.|\\n|\\r)*?)(#{block.close})", "ig"
-        text = text.replace pattern, ($0, $1, $2, $3) ->
-          $1 + (if way is true then Mdash.Lib.encrypt_tag($2) else Mdash.Lib.decrypt_tag($2)) + $3
-
-    return text
-    
-  ###
    * Декодирование блоков, которые были скрыты в момент типографирования
    *
    * @param   string $text
@@ -137,22 +129,6 @@ module.exports = class Mdash
   #   Mdash.Lib.decode_internal_blocks(text)
   
 
-  # create_object: (tret) ->
-  #   tret = @get_short_tret(tret)  if typeof tret is 'string'
-  #   obj = if typeof tret is 'string' then new Mdash.Tret[tret]() else new tret()
-
-  #   if not obj?
-  #     error("Класс #{tret} не найден. Пожалуйста, подргузите нужный файл.")
-  #     return
-    
-  #   obj.DEBUG = @DEBUG
-  #   obj
-  
-  # get_short_tret: (tretName) ->
-  #   if m = tretName.match(/^Mdash\.Tret\.([a-zA-Z0-9_]+)$/)
-  #     return m[1]
-  #   return tretName
-  
   
   ###
    * Получаем ТРЕТ по идентификатору, т.е. заванию класса
@@ -204,8 +180,6 @@ module.exports = class Mdash
     for k, v of res
       str += ".#{k} { #{v} }\n"
     return str
-  
-  
   
   ###
    * Установить режим разметки,

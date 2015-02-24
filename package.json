@@ -2,6 +2,9 @@
   "name": "mdash-node",
   "version": "0.2.13",
   "main": "./lib/mdash",
+  "scripts": {
+  	"test": "grunt test;"
+  },
   "description": "Evgeny Muravjev Typograph for Node.js",
   "keywords": [
     "mdash",
