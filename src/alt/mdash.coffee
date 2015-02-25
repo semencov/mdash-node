@@ -1,7 +1,7 @@
 ###
 
 mdash
-https://github.com/semencov/mdash
+https://github.com/semencov/mdash-node
 
 Copyright (c) 2015 Yuri Sementsov
 Licensed under the MIT license.
@@ -24,20 +24,9 @@ process.on 'uncaughtException', (error) ->
   console.log error.stack
   console.log "========================================================================="
 
-log = (str, data=null) ->
-  if data? then console.log("LOG\t", str, data) else console.log("LOG\t", str)
-  return
-
-error = (info, data=null) ->
-  console.error("ERROR\t #{obj.constructor.name}\t\t\t", info, data)
-  return
-
 debug = (obj, place, after_text, after_text_raw="") ->
   console.info("DEBUG\t #{obj.constructor.name}\t\t\t", place)
   return
-
-compact = (array) ->
-  item for item in array when item
 
 extend = (object, properties) ->
   for key, val of properties
@@ -54,8 +43,9 @@ readFile = (filepath) ->
     contents = fs.readFileSync(String(filepath))
     try
       result = JSON.parse(contents)
-      log "Found .mdash file with settings.", result
+      console.log "FILE\tFound .mdash file with settings.\n".blue, result
     catch e
+      console.log "ERROR\t".bold.red, e
       return
     return result
   catch e
@@ -68,16 +58,28 @@ module.exports = class Mdash
   text: null
   trets: {}
   
-  all_options:
+  presets:
     'Quote':    
-      no_bdquotes : true    # Внутренние кавычки-лапки
-      no_inches   : true    # Расстановка дюйма после числа
+      no_bdquotes : false    # Внутренние кавычки-лапки
+      no_inches   : false    # Расстановка дюйма после числа
     
-    'Nobr.nowrap':
-      disabled : false
-      selector : '*'
-      nowrap   : true       # Nobr (по умолчанию) & nowrap
-    
+    'OptAlign':
+      disabled: true
+    'Text':
+      disabled: true
+    'Dash.ka_de_kas':
+      disabled: true
+    'Date.mdash_month_interval':
+      disabled: true
+    'Date.nbsp_and_dash_month_interval':
+      disabled: true
+    'Nobr.hyphen_nowrap_in_small_words':
+      disabled: true
+    'Nobr.hyphen_nowrap':
+      disabled: true
+    'Punctmark.dot_on_end':
+      disabled: true
+
     'Space.clear_before_after_punct':     # Удаление пробелов перед и после знаков препинания в предложении
       selector    : 'Space.remove_space_before_punctuationmarks'
     'Space.autospace_after':            # Расстановка пробелов после знаков препинания
@@ -85,19 +87,13 @@ module.exports = class Mdash
     'Space.bracket_fix':              # Удаление пробелов внутри скобок, а также расстановка пробела перед скобками
       selector    : ['Space.nbsp_before_open_quote', 'Punctmark.fix_brackets']
         
-    'OptAlign.layout':
-      selector: 'OptAlign'
-      description : 'Inline стили или CSS'
-    
-    'Etc.unicode_convert':
+    'Etc.unicode':
       selector  : '*'
       dounicode : true      # Преобразовывать html-сущности в юникод
       disabled  : true
-  
  
-  constructor: (text, options={}, @DEBUG=false) ->
+  constructor: (text, options={}) ->
     if typeof text is 'object'
-      @DEBUG = options or false
       options = text
       text = null
 
@@ -118,33 +114,6 @@ module.exports = class Mdash
     @setup options
     return
 
-    
-  ###
-   * Декодирование блоков, которые были скрыты в момент типографирования
-   *
-   * @param   string $text
-   * @return  string
-  ###
-  # decode_internal_blocks: (text) ->
-  #   Mdash.Lib.decode_internal_blocks(text)
-  
-
-  
-  ###
-   * Получаем ТРЕТ по идентификатору, т.е. заванию класса
-   *
-   * @param unknown_type $name
-  ###
-  getTret: (name) ->
-    return @trets[name]  if @trets[name]?
-
-    for tret in @getTretNames()
-      if tret is name
-        @init()
-        return @trets[name]
-
-    error("Трэт с идентификатором #{name} не найден")
-    return false
   
   ###
    * Задаём текст для применения типографа
@@ -154,59 +123,12 @@ module.exports = class Mdash
   setText: (text) ->
     @text = text
   
-  
-  ###
-   * Получить содержимое <style></style> при использовании классов
-   * 
-   * @param bool $list false - вернуть в виде строки для style или как массив
-   * @param bool $compact не выводить пустые классы
-   * @return string|array
-  ###
-  getStyle: (list=false, compact=false) ->
-    res = {}
-    for tret in @getTretNames()
-      tretObj = @getTret(tret)
-      arr = tretObj.classes
-      continue  if not _.isArray arr
-
-      for classname, str of arr
-        continue  if compact and not str
-        clsname = (if @class_layout_prefix then @class_layout_prefix else "" ) + (if @tret_objects[tret].class_names[classname]? then @tret_objects[tret].class_names[classname] else classname)
-        res[clsname] = str
-
-    return res  if list
-    str = ""
-
-    for k, v of res
-      str += ".#{k} { #{v} }\n"
-    return str
-  
-  ###
-   * Установить режим разметки,
-   *   Mdash.Lib.LAYOUT_STYLE - с помощью стилей
-   *   Mdash.Lib.LAYOUT_CLASS - с помощью классов
-   *   Mdash.Lib.LAYOUT_STYLE|Mdash.Lib.LAYOUT_CLASS - оба метода
-   *
-   * @param int $layout
-  ###
-  set_tag_layout: (layout=Mdash.Lib.LAYOUT_STYLE) ->
-    @use_layout = layout
-    @use_layout_set = true
-  
-  ###
-   * Установить префикс для классов
-   *
-   * @param string|bool $prefix если true то префикс 'mdash_', иначе то, что передали
-  ###
-  set_class_layout_prefix: (prefix) ->
-    @class_layout_prefix = if prefix? then "mdash_" else prefix
-  
   ###
    * Установлена ли настройка
    *
    * @param string $key
   ###
-  is_on: (key) ->
+  isOn: (key) ->
     return false  if not @settings["*"]?[key]?
     "#{@settings["*"][key]}".toLowerCase() in ["on", "true", "1", "direct"]
 
@@ -227,113 +149,29 @@ module.exports = class Mdash
           result[tret][name] = (rule.disabled isnt true or rule.enabled is true)
           return
 
-    if mask then @selectRules(mask, result) else result
+    if mask then Mdash.Lib.selectRules(mask, result) else result
 
   getSettings: () ->
     @settings
 
-  getTret: (name) ->
-    @rules[name]  if @rules[name]?
-    return
 
-  selectRules: (mask="*", rules=@getRuleNames()) ->
-    selected = {}
-    mask = [mask]  if _.isString mask
-
-    for m in mask
-      m = m.split(".")
-      name = m[0]
-      pattern = Mdash.Lib.processSelectorPattern(name)
-
-      Object.keys(rules).map (key) ->
-        selected[key] = rules[key]  if key.match pattern
-        return
-
-      selected[name] = @selectRules(m.slice(1).join("."), rules[name])  if m.length > 1 and selected[name]?
-    selected
-  
-  prepareSettings: (options={}, defaults={}) ->
-    return options if typeof options isnt 'object'
-
-    settings = {}
-
-    for selector, value of options
-      value = true   if "#{value}".toLowerCase() in ["on", "true", "1", "direct"]
-      value = false  if "#{value}".toLowerCase() in ["off", "false", "0"]
-      value = {disabled: (value is false)}  if typeof value is 'boolean'
-
-      if typeof value is 'object'
-        if defaults[selector]? and typeof defaults[selector] is 'object'
-          # TODO: remove undescore
-          value = _.defaults _.omit(value, 'selector'), _.omit(defaults[selector], 'disabled')
-
-        if 'description' of value
-          delete value['description']
-
-        if 'hide' of value
-          delete value['hide']
-
-        if 'setting' of value
-          value[value.setting] = true
-          delete value['setting']
-
-        if 'disabled' not of value and Object.keys(value).length is 0
-          value.disabled = false
-
-        if 'selector' of value
-          continue  if Object.keys(value).length is 1
-
-          value.selector = [value.selector]  if typeof value.selector is 'string'
-          val = _.omit(value, 'selector')
-
-          if Object.keys(value).length > 2
-            if value['disabled'] is true
-              continue
-            else
-              val = _.omit(val, 'disabled')
-
-          for select in value.selector
-            settings[select] = _.extend {}, val, settings[select]
-          continue
-
-        value = _.omit(value, 'selector')
-
-      settings[selector] = _.extend {}, value, settings[selector]
-    settings
-
-
-  init: () ->
-    for tret in @getTretNames()
-      @trets[tret] = new Mdash.Tret[tret](@settings[tret])  unless @trets[tret]?
-    
-    if not @inited
-      @addSafeBlock 'pre'
-      @addSafeBlock 'code'
-      @addSafeBlock 'script'
-      @addSafeBlock 'style'
-      @addSafeBlock 'notg'
-      @addSafeBlock 'span-notg', ['<span class="_notg_start"></span>', '<span class="_notg_end"></span>']
-
-    @inited = true
-    return
-  
   ###
    * Установить настройки
    *
    * @param array $setupmap
   ###
   setup: (options={}) ->
-    @settings = @prepareSettings(@all_options)
-    options = @prepareSettings(options, @all_options)
+    @settings = Mdash.Lib.processSettings(@presets)
+    options = Mdash.Lib.processSettings(options, @presets)
 
     for selector, value of options
-      value = merge((@settings[selector] or {}), value) or {}
+      value = merge(@settings[selector] or {}, value) or {}
       @settings[selector] = value   if Object.keys(value).length > 0
 
     settings = {}
 
     for selector, value of @settings
-      ruleList = @selectRules selector
+      ruleList = Mdash.Lib.selectRules selector, @getRuleNames()
 
       for tret, rules of ruleList
         settings[tret] = {}  if not settings[tret]?
@@ -349,65 +187,44 @@ module.exports = class Mdash
       
     return
 
-  ###
-   * Remove Safe block/tag from exclusion
-  ###
-  removeSafeBlock: (id) ->
-    for k, block of @blocks
-      delete @blocks[k]  if block.id is id
+
+  init: () ->
+    for tret in @getTretNames()
+      @trets[tret] = new Mdash.Tret[tret](@settings[tret])  unless @trets[tret]?
+    
+    if not @inited
+      @blocks.push Mdash.Lib.addSafeBlock 'pre'
+      @blocks.push Mdash.Lib.addSafeBlock 'code'
+      @blocks.push Mdash.Lib.addSafeBlock 'script'
+      @blocks.push Mdash.Lib.addSafeBlock 'style'
+      @blocks.push Mdash.Lib.addSafeBlock 'notg'
+      @blocks.push Mdash.Lib.addSafeBlock 'span-notg', ['<span class="_notg_start"></span>', '<span class="_notg_end"></span>']
+
+    @inited = true
     return
-
-  ###
-   * Add Safe block/tag for exclusion
-  ###
-  addSafeBlock: (id, tag) ->
-    if not tag?
-      tag = []
-      tag.push "<#{id}[^>]*?>"
-      tag.push "</#{id}>"
-
-    tag.map (str) ->
-      String(str).replace new RegExp('[.\\\\+*?\\[\\^\\]$(){}!|:\\/-]', 'g'), '\\$&'
-
-    pattern = new RegExp "(#{tag[0]})((?:.|\\n|\\r)*?)(#{tag[1]})", "ig"
-    @blocks.push {id: id, pattern: pattern}
-    return
-
   
-  processSafeBlocks: (text, processor=((txt)->txt), reverse=false) ->
-    for block in (if reverse then @blocks.reverse() else @blocks)
-      text = text.replace block.pattern, ($0, $1, $2, $3) ->
-        $1 + processor($2) + $3
-    text
-
-    return text
-
-
   ###
    * Prepare text before applying rules:
    * - encrypt HTML tags
    * - encrypt content inside safe tags
    * - normilize special chars and entities
   ###
-  before: (text) ->
-    text = @processSafeBlocks text, Mdash.Lib.encrypt_tag
-    text = Mdash.Lib.safe_tag_chars(text, true)
-    text = Mdash.Lib.clear_special_chars(text)
-    text
+  beforeFormat: (text) ->
+    text = Mdash.Lib.processSafeBlocks text, @blocks, Mdash.Lib.encode
+    text = Mdash.Lib.processTags text, Mdash.Lib.encode
+    text = Mdash.Lib.clearSpecialChars text
+    text.trim()
 
   ###
    * Clean text after applying rules:
    * - decrypt HTML tags
    * - decript content in safe tags
   ###
-  after: (text) ->
-    text = Mdash.Lib.decode_internal_blocks(text)
-
-    if @is_on('dounicode')
-      Mdash.Lib.convert_html_entities_to_unicode(text)
-    
-    text = Mdash.Lib.safe_tag_chars(text, false)
-    text = @processSafeBlocks text, Mdash.Lib.decrypt_tag, true
+  afterFormat: (text) ->
+    text = Mdash.Lib.decodeInternalBlocks text
+    text = Mdash.Lib.convertEntitiesToUnicode text  if @isOn('dounicode')
+    text = Mdash.Lib.processTags text, Mdash.Lib.decode
+    text = Mdash.Lib.processSafeBlocks text, @blocks, Mdash.Lib.decode, true
 
     if not @disable_notg_replace
       repl = ['<span class="_notg_start"></span>', '<span class="_notg_end"></span>']
@@ -422,15 +239,41 @@ module.exports = class Mdash
    *
   ###
   format: (text, options, callback) ->
-    @setText(text)  if text?
+    @setText(text)   if text?
     @setup(options)  if options? and typeof options is 'object'
     
-    @text = @before @text
+    @text = @beforeFormat @text
     @text = tretObj.apply @text  for tretName, tretObj of @trets
-    @text = @after @text
+    @text = @afterFormat @text
 
     @text
 
+
+  ###
+   * Получить содержимое <style></style> при использовании классов
+   * 
+   * @param bool $list false - вернуть в виде строки для style или как массив
+   * @param bool $compact не выводить пустые классы
+   * @return string|array
+  ###
+  getStyle: (list=false, compact=false) ->
+    res = {}
+    for tret in @getTretNames()
+      tretObj = @trets[tret]
+      arr = tretObj.classes
+      continue  if not Array.isArray arr
+
+      for classname, str of arr
+        continue  if compact and not str
+        clsname = (if @class_layout_prefix then @class_layout_prefix else "" ) + (if @tret_objects[tret].class_names[classname]? then @tret_objects[tret].class_names[classname] else classname)
+        res[clsname] = str
+
+    return res  if list
+    str = ""
+
+    for k, v of res
+      str += ".#{k} { #{v} }\n"
+    return str
 
   ###
    * Запустить типограф со стандартными параметрами
@@ -440,7 +283,7 @@ module.exports = class Mdash
    * @return string
   ###
   @format: (text, options={}, callback) ->
-    obj = new this(text, options, callback)
+    obj = new this(text, options)
     obj.format()
 
   @getTretNames: (short=true) ->
@@ -449,3 +292,23 @@ module.exports = class Mdash
   @getRuleNames: (mask) ->
     @::getRuleNames(mask)
 
+  ###
+   * Установить режим разметки,
+   *   Mdash.Lib.LAYOUT_STYLE - с помощью стилей
+   *   Mdash.Lib.LAYOUT_CLASS - с помощью классов
+   *   Mdash.Lib.LAYOUT_STYLE|Mdash.Lib.LAYOUT_CLASS - оба метода
+   *
+   * @param int $layout
+  ###
+  @setLayout: (layout=Mdash.Lib.LAYOUT_STYLE) ->
+    Mdash.Lib.layout = layout
+  
+  ###
+   * Установить префикс для классов
+   *
+   * @param string|bool $prefix если true то префикс 'mdash_', иначе то, что передали
+  ###
+  @setLayoutClassPrefix: (prefix) ->
+    Mdash.Lib.layoutClassPrefix = if not prefix? then "mdash-" else prefix
+
+  @getStyles: () ->

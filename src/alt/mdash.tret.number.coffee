@@ -24,9 +24,8 @@ class Mdash.Tret.Number extends Mdash.Tret
 
     # Замена x на символ × в размерных единицах
     auto_times_x:
-      cycled: true
       pattern: [
-        /([^a-zA-Z><]|^)(\&times\;)?(\d+)(\040*)(x|х)(\040*)(\d+)([^a-zA-Z><]|$)/g
+        /([^a-zA-Z><]|^)(\&times\;)?(\d+)(\s*)(x|х)(\s*)(\d+)([^a-zA-Z><]|$)/g
       ]
       replacement: [
         -> "#{$1}#{$2}#{$3}&times;#{$7}#{$8}"
@@ -38,7 +37,7 @@ class Mdash.Tret.Number extends Mdash.Tret
         /([a-zа-яё0-9])\_([\d]{1,3})([^а-яёa-z0-9]|$)/ig
       ]
       replacement: [
-        -> $1 + @tag(@tag($2, "small"), "sub") + $3
+        -> $1 + Mdash.Lib.tag(Mdash.Lib.tag($2, "small"), "sub") + $3
       ]
 
     # Верхний индекс
@@ -47,7 +46,7 @@ class Mdash.Tret.Number extends Mdash.Tret
         /([a-zа-яё0-9])\^([\d]{1,3})([^а-яёa-z0-9]|$)/ig
       ]
       replacement: [
-        -> $1 + @tag(@tag($2, "small"), "sup") + $3
+        -> $1 + Mdash.Lib.tag(Mdash.Lib.tag($2, "small"), "sup") + $3
       ]
 
     # Замена дробей 1/2, 1/4, 3/4 на соответствующие символы

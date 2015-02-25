@@ -33,7 +33,6 @@ class Mdash.Tret.Punctmark extends Mdash.Tret
 
     # Замена трех точек на знак многоточия
     hellip:
-      simple_replace: true
       pattern: [
         /\.\.\./g
       ]
@@ -66,8 +65,8 @@ class Mdash.Tret.Punctmark extends Mdash.Tret
     # Лишние пробелы после открывающей скобочки и перед закрывающей
     fix_brackets:
       pattern: [
-        /(\()(\040|\t)+/g
-        /(\040|\t)+(\))/g
+        /(\()(\s|\t)+/g
+        /(\s|\t)+(\))/g
       ]
       replacement: [
         -> "#{$1}"
@@ -85,9 +84,8 @@ class Mdash.Tret.Punctmark extends Mdash.Tret
 
     # Точка в конце текста, если её там нет
     dot_on_end:
-      disabled: true
       pattern: [
-        /([a-zа-яё0-9])(\040|\t|\&nbsp\;)*$/gi
+        /([a-zа-яё0-9])(\s|\t|\&nbsp\;)*$/gi
       ]
       replacement: [
         -> "#{$1}."

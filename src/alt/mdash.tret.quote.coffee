@@ -1,6 +1,3 @@
-# Mdash.Lib = require "./mdash.lib"
-# Mdash.Tret = require "./mdash.tret"
-
 class Mdash.Tret.Quote extends Mdash.Tret
 
   QUOTE_FIRS_OPEN    : '&laquo;'
@@ -27,7 +24,7 @@ class Mdash.Tret.Quote extends Mdash.Tret
     # Открывающая кавычка
     open_quote:
       pattern: [
-        /(^|\(|\s|\>|-)(\"|\\\"|\&laquo\;)(\S+)/ig
+        /(^|\(|\s|\>|-)(\"|\&laquo\;)(\S+)/ig
       ]
       replacement: [
         -> "#{$1}#{@QUOTE_FIRS_OPEN}#{$3}"
@@ -36,7 +33,7 @@ class Mdash.Tret.Quote extends Mdash.Tret
     # Закрывающая кавычка
     close_quote:
       pattern: [
-        /([a-zа-яё0-9]|\.|\&hellip\;|\!|\?|\>|\)|\:)((\"|\\\"|\&raquo\;)+)(\.|\&hellip\;|\;|\:|\?|\!|\,|\s|\)|\<\/|$)/gi
+        /([a-zа-яё0-9]|\.|\&hellip\;|\!|\?|\>|\)|\:)((\"|\&raquo\;)+)(\.|\&hellip\;|\&nbsp\;|\;|\:|\?|\!|\,|\s|\)|\<\/|$)/gi
       ]
       replacement: [
         -> "#{$1}" + @str_repeat(@QUOTE_FIRS_CLOSE, ($2.split("\"").length - 1) + ($2.split("&raquo;").length - 1)) + "#{$4}"
@@ -45,8 +42,8 @@ class Mdash.Tret.Quote extends Mdash.Tret
     # Закрывающая кавычка особые случаи
     close_quote_adv:
       pattern: [
-        /([a-zа-яё0-9]|\.|\&hellip\;|\!|\?|\>|\)|\:)((\"|\\\"|\&laquo\;)+)(\<[^\>]+\>)(\.|\&hellip\;|\;|\:|\?|\!|\,|\)|\<\/|$| )/gi
-        /([a-zа-яё0-9]|\.|\&hellip\;|\!|\?|\>|\)|\:)(\s+)((\"|\\\")+)(\s+)(\.|\&hellip\;|\;|\:|\?|\!|\,|\)|\<\/|$| )/gi
+        /([a-zа-яё0-9]|\.|\&hellip\;|\!|\?|\>|\)|\:)((\"|\&laquo\;)+)(\<[^\>]+\>)(\.|\&hellip\;|\&nbsp\;|\;|\:|\?|\!|\,|\)|\<\/|$| )/gi
+        /([a-zа-яё0-9]|\.|\&hellip\;|\!|\?|\>|\)|\:)(\s+)(\"+)(\s+)(\.|\&hellip\;|\&nbsp\;|\;|\:|\?|\!|\,|\)|\<\/|$| )/gi
         /\>(\&laquo\;)\.($|\s|\<)/gi
         /\>(\&laquo\;),($|\s|\<|\S)/gi
         /\>(\&laquo\;):($|\s|\<|\S)/gi
@@ -70,24 +67,23 @@ class Mdash.Tret.Quote extends Mdash.Tret
 
     # Внутренние кавычки-лапки и дюймы
     quotation:
-      disabled: true
-      function: (text) ->
+      function: (text, rule) ->
         okposstack = [0]
         okpos = 0
         level = 0
         offset = 0
 
-        while(true)
-          p = Mdash.Lib.strpos_ex text, ["&laquo;", "&raquo;"], offset
+        while (true)
+          p = @strpos_ex text, ["&laquo;", "&raquo;"], offset
           break  if p is false
-          
+
           if p.str is "&laquo;"
-            @inject_in text, p.pos, @QUOTE_CRAWSE_OPEN  if level > 0 and not @is_on('no_bdquotes')
+            text = @inject_in text, p.pos, @QUOTE_CRAWSE_OPEN  if level > 0 and not rule.no_bdquotes
             level++
 
           if p.str is "&raquo;"
             level--
-            @inject_in text, p.pos, @QUOTE_CRAWSE_CLOSE  if level > 0 and not @is_on('no_bdquotes')
+            text = @inject_in text, p.pos, @QUOTE_CRAWSE_CLOSE  if level > 0 and not rule.no_bdquotes
 
           offset = p.pos + "#{p.str}".length
 
@@ -96,7 +92,7 @@ class Mdash.Tret.Quote extends Mdash.Tret
             okposstack.push okpos
           else
             if level < 0
-              if not @is_on('no_inches')
+              if not rule.no_inches
                 amount = 0
                 while amount is 0 and okposstack.length
                   lokpos = okposstack.pop()
@@ -145,5 +141,28 @@ class Mdash.Tret.Quote extends Mdash.Tret
 
   inject_in: (text, index, string) ->
     text = text.substring(0, index) + string + text.substring(index + string.length, text.length)
+    text
 
+  strpos_ex: (haystack, needle, offset = null) ->
+    if Array.isArray needle
+      m = -1
+      w = false
+
+      for n in needle
+        p = haystack.indexOf n, offset
+
+        continue  if p is -1
+
+        if m is -1
+          m = p
+          w = n
+          continue
+
+        if p < m
+          m = p
+          w = n
+
+      return false  if m is -1
+      return {pos: m, str: w}
+    haystack.indexOf needle, offset
 

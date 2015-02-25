@@ -2,17 +2,12 @@
 
 class Mdash.Tret.Abbr extends Mdash.Tret
 
-  domain_zones: ['ru', 'ру', 'com', 'ком', 'org', 'орг', 'уа', 'ua', 'lv', 'lt', 'ee', 'eu']
-  
-  classes:
-    nowrap: 'white-space:nowrap;'
-
   rules:
 
     # Расстановка пробелов перед сокращениями dpi, lpi
     nobr_abbreviation:
       pattern: [
-        /(\s+|^|\>)(\d+)(\040|\t)*(dpi|lpi)([\s\;\.\?\!\:\(]|$)/ig
+        /(\s+|^|\>)(\d+)(\s|\t)*(dpi|lpi)([\s\;\.\?\!\:\(]|$)/ig
       ]
       replacement: [
         -> "#{$1}#{$2}&nbsp;#{$4}#{$5}"
@@ -21,7 +16,7 @@ class Mdash.Tret.Abbr extends Mdash.Tret
     # Расстановка пробелов перед сокращениями гл., стр., рис., илл., ст., п.
     nobr_acronym:
       pattern: [
-        /(\s|^|\>|\()(гл|стр|рис|илл?|ст|п|с)\.(\040|\t)*(\d+)(\&nbsp\;|\s|\.|\,|\?|\!|\)|$)/ig
+        /(\s|^|\>|\()(гл|стр|рис|илл?|ст|п|с)\.(\s|\t)*(\d+)(\&nbsp\;|\s|\.|\,|\?|\!|\)|$)/ig
       ]
       replacement: [
         -> "#{$1}#{$2}.&nbsp;#{$4}#{$5}"
@@ -30,7 +25,7 @@ class Mdash.Tret.Abbr extends Mdash.Tret
     # Расстановка пробелов перед сокращениями см., им.
     nobr_sm_im:
       pattern: [
-        /(\s|^|\>|\()(см|им)\.(\040|\t)*([а-яё0-9a-z]+)(\s|\.|\,|\?|\!|\)|$)/ig
+        /(\s|^|\>|\()(см|им)\.(\s|\t)*([а-яё0-9a-z]+)(\s|\.|\,|\?|\!|\)|$)/ig
       ]
       replacement: [
         -> "#{$1}#{$2}.&nbsp;#{$4}#{$5}"
@@ -39,9 +34,9 @@ class Mdash.Tret.Abbr extends Mdash.Tret
     # Расстановка пробелов в сокращениях г., ул., пер., д.
     nobr_locations:
       pattern: [
-        /(\s|^|\>)(г|ул|пер|просп|пл|бул|наб|пр|ш|туп)\.(\040|\t)*([а-яё0-9a-z]+)(\s|\.|\,|\?|\!|$)/ig
-        /(\s|^|\>)(б\-р|пр\-кт)(\040|\t)*([а-яё0-9a-z]+)(\s|\.|\,|\?|\!|$)/ig
-        /(\s|^|\>)(д|кв|эт)\.(\040|\t)*(\d+)(\s|\.|\,|\?|\!|$)/ig
+        /(\s|^|\>)(г|ул|пер|просп|пл|бул|наб|пр|ш|туп)\.(\s|\t)*([а-яё0-9a-z]+)(\s|\.|\,|\?|\!|$)/ig
+        /(\s|^|\>)(б\-р|пр\-кт)(\s|\t)*([а-яё0-9a-z]+)(\s|\.|\,|\?|\!|$)/ig
+        /(\s|^|\>)(д|кв|эт)\.(\s|\t)*(\d+)(\s|\.|\,|\?|\!|$)/ig
       ]
       replacement: [
         -> "#{$1}#{$2}.&nbsp;#{$4}#{$5}"
@@ -81,24 +76,23 @@ class Mdash.Tret.Abbr extends Mdash.Tret
     # Объединение сокращений P.S., P.P.S.
     ps_pps:
       pattern: [
-        /(^|\040|\t|\>|\r|\n)(p\.\040?)(p\.\040?)?(s\.)([^\<])/ig
+        /(^|\s|\t|\>|\r|\n)(p\.\s?)(p\.\s?)?(s\.)([^\<])/ig
       ]
       replacement: [
-        -> $1 + @tag("#{$2.trim()} " + (if $3? then "#{$3.trim()} " else "") + $4, "span", {class: "nowrap"}) + $5
+        -> $1 + Mdash.Lib.tag("#{$2.trim()} " + (if $3? then "#{$3.trim()} " else "") + $4, "nobr") + $5
       ]
 
     # Объединение сокращений и т.д., и т.п., в т.ч.
     nobr_vtch_itd_itp:
-      cycled: true
       pattern: [
         /(^|\s|\&nbsp\;)и( |\&nbsp\;)т\.?[ ]?д(\.|$|\s|\&nbsp\;)/g
         /(^|\s|\&nbsp\;)и( |\&nbsp\;)т\.?[ ]?п(\.|$|\s|\&nbsp\;)/g
         /(^|\s|\&nbsp\;)в( |\&nbsp\;)т\.?[ ]?ч(\.|$|\s|\&nbsp\;)/g
       ]
       replacement: [
-        -> $1 + @tag("и т. д.", "span",  {class: "nowrap"}) + (if $3 isnt "." then $3 else "")
-        -> $1 + @tag("и т. п.", "span",  {class: "nowrap"}) + (if $3 isnt "." then $3 else "")
-        -> $1 + @tag("в т. ч.", "span",  {class: "nowrap"}) + (if $3 isnt "." then $3 else "")
+        -> $1 + Mdash.Lib.tag("и т. д.", "nobr") + (if $3 isnt "." then $3 else "")
+        -> $1 + Mdash.Lib.tag("и т. п.", "nobr") + (if $3 isnt "." then $3 else "")
+        -> $1 + Mdash.Lib.tag("в т. ч.", "nobr") + (if $3 isnt "." then $3 else "")
       ]
 
     # Обработка т.е.
@@ -107,13 +101,13 @@ class Mdash.Tret.Abbr extends Mdash.Tret
         /(^|\s|\&nbsp\;)([тТ])\.?[ ]?е\./g
       ]
       replacement: [
-        -> $1 + @tag($2 + ". е.", "span", {class: "nowrap"})
+        -> $1 + Mdash.Lib.tag($2 + ". е.", "nobr")
       ]
 
     # Форматирование денежных сокращений (расстановка пробелов и привязка названия валюты к числу)
     nbsp_money_abbr:
       pattern: [
-        /(\d)((\040|\&nbsp\;)?(тыс|млн|млрд)\.?(\040|\&nbsp\;)?)?(\040|\&nbsp\;)?(руб\.|долл\.|евро|€|&euro;|\$|у[\.]? ?е[\.]?)/g
+        /(\d)((\s|\&nbsp\;)?(тыс|млн|млрд)\.?(\s|\&nbsp\;)?)?(\s|\&nbsp\;)?(руб\.|долл\.|евро|€|&euro;|\$|у[\.]? ?е[\.]?)/g
       ]
       replacement: [
         -> $1 + (if $4? then "&nbsp;" + $4 + (if $4 is "тыс" then "." else "") else "") + "&nbsp;" + (if not $7.match(/у[\\\\.]? ?е[\\\\.]?/gi) then $7 else "у.е.")
@@ -133,16 +127,16 @@ class Mdash.Tret.Abbr extends Mdash.Tret
     # Привязка сокращения ГОСТ к номеру
     nobr_gost:
       pattern: [
-        /(\040|\t|\&nbsp\;|^)ГОСТ( |\&nbsp\;)?(\d+\.?\d*)((\-|\&minus\;|\&mdash\;)(\d+))?(( |\&nbsp\;)(\-|\&mdash\;))?/ig
-        /(\040|\t|\&nbsp\;|^|\>)ГОСТ( |\&nbsp\;)?(\d+\.?\d*)(\-|\&minus\;|\&mdash\;)(\d+)/ig
-        /(\040|\t|\&nbsp\;|^|\>)LVS( |\&nbsp\;)?(\d+)(\:|\-|\&minus\;|\&mdash\;|)(\d+)/ig  # правило для Латвии
-        /(\040|\t|\&nbsp\;|^|\>)(RFC|ISO|IEEE)( |\&nbsp\;)?(\d+[.-\/]?\d?)/ig  # правило для международных стандартов
+        /(\s|\t|\&nbsp\;|^)ГОСТ( |\&nbsp\;)?(\d+\.?\d*)((\-|\&minus\;|\&mdash\;)(\d+))?(( |\&nbsp\;)(\-|\&mdash\;))?/ig
+        /(\s|\t|\&nbsp\;|^|\>)ГОСТ( |\&nbsp\;)?(\d+\.?\d*)(\-|\&minus\;|\&mdash\;)(\d+)/ig
+        /(\s|\t|\&nbsp\;|^|\>)LVS( |\&nbsp\;)?(\d+)(\:|\-|\&minus\;|\&mdash\;|)(\d+)/ig  # правило для Латвии
+        /(\s|\t|\&nbsp\;|^|\>)(RFC|ISO|IEEE)( |\&nbsp\;)?(\d+[.-\/]?\d?)/ig  # правило для международных стандартов
       ]
       replacement: [
-        -> $1 + @tag("ГОСТ #{$3}" + (if $6? then "&ndash;" + $6 else "") + (if $7? then " &mdash;" else ""), "span", {class:"nowrap"})
+        -> $1 + Mdash.Lib.tag("ГОСТ #{$3}" + (if $6? then "&ndash;" + $6 else "") + (if $7? then " &mdash;" else ""), "nobr")
         -> "#{$1}ГОСТ #{$3}&ndash;#{$5}"
-        -> $1 + @tag("LVS #{$3}:#{$5}", "span", {class:"nowrap"})  # правило для Латвии
-        -> $1 + @tag("#{$2} #{$4}", "span", {class:"nowrap"})  # правило для международных стандартов
+        -> $1 + Mdash.Lib.tag("LVS #{$3}:#{$5}", "nobr")  # правило для Латвии
+        -> $1 + Mdash.Lib.tag("#{$2} #{$4}", "nobr")  # правило для международных стандартов
       ]
 
 

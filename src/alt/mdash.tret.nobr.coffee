@@ -2,9 +2,6 @@
 
 class Mdash.Tret.Nobr extends Mdash.Tret
   
-  classes:
-    nowrap: 'white-space:nowrap;'
-
   rules:
 
     # Привязка союзов и предлогов к написанным после словам
@@ -32,7 +29,7 @@ class Mdash.Tret.Nobr extends Mdash.Tret
         /([^\d\+]|^)([\+]?[0-9]{1,3})( |\&nbsp\;|\&thinsp\;)([0-9]{3,4}|[0-9]{3,4})( |\&nbsp\;|\&thinsp\;)([0-9]{2,3})(-|\&minus\;)([0-9]{2})(-|\&minus\;)([0-9]{2})([^\d]|$)/g
       ]
       replacement: [
-        -> $1 + (if $1 is ">" or $1 is "<" then "#{$2} #{$4} #{$6}-#{$8}-#{$1}" else @tag("#{$2} #{$4} #{$6}-#{$8}-#{$1}", "span", {class: "nowrap"})) + $1
+        -> $1 + (if $1 is ">" or $1 is "<" then "#{$2} #{$4} #{$6}-#{$8}-#{$1}" else Mdash.Lib.tag("#{$2} #{$4} #{$6}-#{$8}-#{$1}", "nobr")) + $1
       ]
 
     # Объединение IP-адресов
@@ -51,14 +48,14 @@ class Mdash.Tret.Nobr extends Mdash.Tret
         /(\s|^|\.|\,|\;|\:|\?|\!|\&nbsp\;)([А-ЯЁ][а-яё]+)(\s|\&nbsp\;)([А-ЯЁ])\.?(\s|\&nbsp\;)?([А-ЯЁ])\.?(\s|$|\.|\,|\;|\:|\?|\!|\&nbsp\;)/g
       ]
       replacement: [
-        -> $1 + @tag("#{$2}. #{$4}. #{$8}", "span", {class: "nowrap"}) + $9
-        -> $1 + @tag("#{$2} #{$4}. #{$6}.", "span", {class: "nowrap"}) + $7
+        -> $1 + Mdash.Lib.tag("#{$2}. #{$4}. #{$8}", "nobr") + $9
+        -> $1 + Mdash.Lib.tag("#{$2} #{$4}. #{$6}.", "nobr") + $7
       ]
 
     # Неразрывный пробел перед частицей
     nbsp_before_particle:
       pattern: [
-        /(\040|\t)+(ли|бы|б|же|ж)(\&nbsp\;|\.|\,|\:|\;|\&hellip\;|\?|\s)/ig
+        /(\s|\t)+(ли|бы|б|же|ж)(\&nbsp\;|\.|\,|\:|\;|\&hellip\;|\?|\s)/ig
       ]
       replacement: [
         -> "&nbsp;#{$2}" + (if $3 is "&nbsp;" then " " else $3)
@@ -84,24 +81,20 @@ class Mdash.Tret.Nobr extends Mdash.Tret
 
     # Обрамление пятисимвольных слов разделенных дефисом в неразрывные блоки
     hyphen_nowrap_in_small_words:
-      disabled: true
-      cycled: true
       pattern: [
         /(\&nbsp\;|\s|\>|^)([a-zа-яё]{1}\-[a-zа-яё]{4}|[a-zа-яё]{2}\-[a-zа-яё]{3}|[a-zа-яё]{3}\-[a-zа-яё]{2}|[a-zа-яё]{4}\-[a-zа-яё]{1}|когда\-то|кое\-как|кой\-кого|вс[её]\-таки|[а-яё]+\-(кась|ка|де))(\s|\.|\,|\!|\?|\&nbsp\;|\&hellip\;|$)/gi
       ]
       replacement: [
-        -> $1 + @tag($2, "span", {class: "nowrap"}) + $4
+        -> $1 + Mdash.Lib.tag($2, "nobr") + $4
       ]
 
     # Отмена переноса слова с дефисом
     hyphen_nowrap:
-      disabled: true
-      cycled: true
       pattern: [
         /(\&nbsp\;|\s|\>|^)([a-zа-яё]+)((\-([a-zа-яё]+)){1,2})(\s|\.|\,|\!|\?|\&nbsp\;|\&hellip\;|$)/gi
       ]
       replacement: [
-        -> $1 + @tag("#{$2}#{$3}", "span", {class: "nowrap"}) + $6
+        -> $1 + Mdash.Lib.tag("#{$2}#{$3}", "nobr") + $6
       ]
 
 
@@ -116,7 +109,7 @@ class Mdash.Tret.Nobr extends Mdash.Tret
         break
     
     if addTag is true
-      triads = @tag(triads, 'span', {class: "nowrap"})
+      triads = Mdash.Lib.tag(triads, 'nobr')
     
     return triads
 

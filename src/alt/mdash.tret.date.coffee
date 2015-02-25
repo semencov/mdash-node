@@ -1,8 +1,5 @@
 class Mdash.Tret.Date extends Mdash.Tret
 
-  classes:
-    nowrap: 'white-space:nowrap;'
-
   rules:
 
     # Установка тире и пробельных символов в периодах дат
@@ -16,7 +13,6 @@ class Mdash.Tret.Date extends Mdash.Tret
     
     # Расстановка тире и объединение в неразрывные периоды месяцев
     mdash_month_interval:
-      # disabled: true
       pattern: [
         /((январ|феврал|сентябр|октябр|ноябр|декабр)([ьяюе]|[её]м)|(апрел|июн|июл)([ьяюе]|ем)|(март|август)([ауе]|ом)?|ма[йяюе]|маем)\-((январ|феврал|сентябр|октябр|ноябр|декабр)([ьяюе]|[её]м)|(апрел|июн|июл)([ьяюе]|ем)|(март|август)([ауе]|ом)?|ма[йяюе]|маем)/gi
       ]
@@ -26,14 +22,12 @@ class Mdash.Tret.Date extends Mdash.Tret
     
     # Расстановка тире и объединение в неразрывные периоды дней
     nbsp_and_dash_month_interval:
-      disabled: true
       pattern: [
         /([^\>]|^)(\d+)(\-|\&minus\;|\&mdash\;)(\d+)( |\&nbsp\;)(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)([^\<]|$)/gi
       ]
       replacement: [
-        -> $1 + @tag("#{$2}&mdash;#{$4} #{$6}", "span", {class: "nowrap"}) + $7
+        -> $1 + Mdash.Lib.tag("#{$2}&mdash;#{$4} #{$6}", "nobr") + $7
       ]
-      nowrap: true
     
     # Привязка года к дате
     nobr_year_in_date:
@@ -42,23 +36,23 @@ class Mdash.Tret.Date extends Mdash.Tret
         /(\s|\&nbsp\;)([0-9]{2}\.[0-9]{2}\.([0-9]{2})?[0-9]{2})(\s|\&nbsp\;|\.(\s|\&nbsp\;|$)|$)/gi
       ]
       replacement: [
-        -> $1 + @tag("#{$2} г.", "span", {class: "nowrap"}) + (if $5 is "+" then "" else " ")
-        -> $1 + @tag($2, "span", {class: "nowrap"}) + $4
+        -> $1 + Mdash.Lib.tag("#{$2} г.", "nobr") + (if $5 is "+" then "" else " ")
+        -> $1 + Mdash.Lib.tag($2, "nobr") + $4
       ]
     
     # Пробел после года
     space_posle_goda:
       pattern: [
-        /(^|\040|\&nbsp\;)([0-9]{3,4})(год([ауе]|ом)?)([^a-zа-яё]|$)/gi
+        /(^|\s|\&nbsp\;)([0-9]{3,4})(год([ауе]|ом)?)([^a-zа-яё]|$)/gi
       ]
       replacement: [
         -> "#{$1}#{$2} #{$3}#{$5}"
       ]
     
-    # Пробел после года
+    # Пробел после сокращения года
     nbsp_posle_goda_abbr:
       pattern: [
-        /(^|\040|\&nbsp\;|\"|\&laquo\;)([0-9]{3,4})[ ]?(г\.)([^a-zа-яё]|$)/gi
+        /(^|\s|\&nbsp\;|\"|\&laquo\;)([0-9]{3,4})[ ]?(г\.)([^a-zа-яё]|$)/gi
       ]
       replacement: [
         -> "#{$1}#{$2}&nbsp;#{$3}#{$4}"

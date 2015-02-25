@@ -1,7 +1,7 @@
-# Mdash.Lib = require "./mdash.lib"
-# Mdash.Tret = require "./mdash.tret"
 
 class Mdash.Tret.Etc extends Mdash.Tret
+
+  order: 12
   
   classes:
     nowrap: 'white-space:nowrap;'
@@ -23,16 +23,16 @@ class Mdash.Tret.Etc extends Mdash.Tret
         /((\s|\&nbsp\;|^)+)\^([a-zа-яё0-9\.\:\,\-]+)(\s|\&nbsp\;|$|\.$)/ig
       ]
       replacement: [
-        -> @tag(@tag($3, "small"), "sup") + $4
+        -> Mdash.Lib.tag(Mdash.Lib.tag($3, "small"), "sup") + $4
       ]
 
     # Тире между диапозоном веков
     century_period:
       pattern: [
-        /(\040|\t|\&nbsp\;|^)([XIV]{1,5})(-|\&mdash\;)([XIV]{1,5})(( |\&nbsp\;)?(в\.в\.|вв\.|вв|в\.|в))/g
+        /(\s|\t|\&nbsp\;|^)([XIV]{1,5})(-|\&mdash\;)([XIV]{1,5})(( |\&nbsp\;)?(в\.в\.|вв\.|вв|в\.|в))/g
       ]
       replacement: [
-        -> $1 + @tag("#{$2}&mdash;#{$4} вв.", "span", {class: "nowrap"})
+        -> $1 + Mdash.Lib.tag("#{$2}&mdash;#{$4} вв.", "nobr")
       ]
 
     # Тире и отмена переноса между диапозоном времени
@@ -41,13 +41,13 @@ class Mdash.Tret.Etc extends Mdash.Tret
         /([^\d\>]|^)([\d]{1,2}\:[\d]{2})(-|\&mdash\;|\&minus\;)([\d]{1,2}\:[\d]{2})([^\d\<]|$)/ig
       ]
       replacement: [
-        -> $1 + @tag("#{$2}&mdash;#{$4}", "span", {class: "nowrap"}) + $5
+        -> $1 + Mdash.Lib.tag("#{$2}&mdash;#{$4}", "nobr") + $5
       ]
 
     # Удаление nbsp в nobr/nowrap тэгах
     expand_no_nbsp_in_nobr:
-      function: (text) ->
-        thetag = @tag("###", 'span', {class: "nowrap"})
+      function: (text, rule) ->
+        thetag = Mdash.Lib.tag("###", 'nobr')
         arr = thetag.split("###")
         b = Mdash.Lib.preg_quote(arr[0], '/')
         e = Mdash.Lib.preg_quote(arr[1], '/')

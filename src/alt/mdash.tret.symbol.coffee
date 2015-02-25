@@ -10,7 +10,7 @@ class Mdash.Tret.Symbol extends Mdash.Tret
     # Замена (tm) на символ торговой марки
     tm_replace:
       pattern: [
-        /([\040\t])?\(tm\)/ig
+        /([\s\t])?\(tm\)/ig
       ]
       replacement: [
         -> "&trade;"
@@ -52,7 +52,7 @@ class Mdash.Tret.Symbol extends Mdash.Tret
         /([0-9]+)F($|\s|\.|\,|\;|\:|\&nbsp\;|\?|\!)/g
       ]
       replacement: [
-        -> @tag("#{$1} &deg;F", "span", {class: "nowrap"}) + $2
+        -> Mdash.Lib.tag("#{$1} &deg;F", "nobr") + $2
       ]
 
     # Символ евро

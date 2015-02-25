@@ -18,25 +18,25 @@ class Mdash.Tret.OptAlign extends Mdash.Tret
     # Оптическое выравнивание открывающей кавычки
     oa_oquote:
       pattern: [
-        /([a-zа-яё\-]{3,})(\040|\&nbsp\;|\t)(\&laquo\;)/ig
+        /([a-zа-яё\-]{3,})(\s|\&nbsp\;|\t)(\&laquo\;)/ig
         /(\n|\r|^)(\&laquo\;)/ig
       ]
       replacement: [
-        -> $1 + @tag($2, "span", {class: "oa_oqoute_sp_s"}) + @tag($3, "span", {class: "oa_oqoute_sp_q"})
-        -> $1 + @tag($2, "span", {class: "oa_oquote_nl"})
+        -> $1 + Mdash.Lib.tag($2, "span", {class: "oa_oqoute_sp_s", style: @classes.oa_oqoute_sp_s}) + Mdash.Lib.tag($3, "span", {class: "oa_oqoute_sp_q", style: @classes.oa_oqoute_sp_q})
+        -> $1 + Mdash.Lib.tag($2, "span", {class: "oa_oquote_nl", style: @classes.oa_oquote_nl})
       ]
 
     # Оптическое выравнивание для пунктуации (скобка и запятая)
     oa_obracket_coma:
       pattern: [
-        /(\040|\&nbsp\;|\t)\(/g
+        /(\s|\&nbsp\;|\t)\(/g
         /(\n|\r|^)\(/g
-        /([а-яёa-z0-9]+)\,(\040+)/g
+        /([а-яёa-z0-9]+)\,(\s+)/g
       ]
       replacement: [
-        -> @tag($1, "span", {class: "oa_obracket_sp_s"}) + @tag("(", "span", {class: "oa_obracket_sp_b"})
-        -> $1 + @tag("(", "span", {class: "oa_obracket_nl_b"})
-        -> $1 + @tag(",", "span", {class: "oa_comma_b"}) + @tag(" ", "span", {class: "oa_comma_e"})
+        -> Mdash.Lib.tag($1, "span", {class: "oa_obracket_sp_s", style: @classes.oa_obracket_sp_s}) + Mdash.Lib.tag("(", "span", {class: "oa_obracket_sp_b", style: @classes.oa_obracket_sp_b})
+        -> $1 + Mdash.Lib.tag("(", "span", {class: "oa_obracket_nl_b", style: @classes.oa_obracket_nl_b})
+        -> $1 + Mdash.Lib.tag(",", "span", {class: "oa_comma_b", style: @classes.oa_comma_b}) + Mdash.Lib.tag(" ", "span", {class: "oa_comma_e", style: @classes.oa_comma_e})
       ]
 
     # Оптическое выравнивание кавычки
@@ -44,6 +44,6 @@ class Mdash.Tret.OptAlign extends Mdash.Tret
       function: (text) ->
         self = @
         text.replace new RegExp("(<#{@BASE64_PARAGRAPH_TAG}>)([\\s]+)?(\\&laquo\\;)", 'ig'), ($0, $1, $2, $3) ->
-          $1 + self.tag($3, "span", {class: "oa_oquote_nl"})
+          $1 + Mdash.Lib.tag($3, "span", {class: "oa_oquote_nl", style: self.classes.oa_oquote_nl})
 
     

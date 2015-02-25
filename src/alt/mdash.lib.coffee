@@ -1,19 +1,32 @@
 
 class Mdash.Lib
-  @DEBUG = false or Mdash.DEBUG
 
   @LAYOUT_STYLE = 1
   @LAYOUT_CLASS = 2
-  
+
   @INTERNAL_BLOCK_OPEN = '%%%INTBLOCKO235978%%%'
   @INTERNAL_BLOCK_CLOSE = '%%%INTBLOCKC235978%%%'
+
+  # @BASE64_PARAGRAPH_TAG = 'cA==' # // p
+  # @BASE64_BREAKLINE_TAG = 'YnIgLw==' # // br / (с пробелом и слэшем)
+  # @BASE64_NOBR_OTAG     = 'bm9icg==' # // nobr
+  # @BASE64_NOBR_CTAG     = 'L25vYnI=' # // /nobr
+  
+  # @QUOTE_FIRS_OPEN    = '&laquo;'
+  # @QUOTE_FIRS_CLOSE   = '&raquo;'
+  # @QUOTE_CRAWSE_OPEN  = '&bdquo;'
+  # @QUOTE_CRAWSE_CLOSE = '&ldquo;'
+
+  @layout = @LAYOUT_STYLE
+  @layoutClassPrefix = 'mdash-'
+  @layoutTagId = false
 
   ###
    * Таблица символов
    *
    * @var array
   ###
-  @charsTable =
+  __charsTable =
     '"':
       html: ["&laquo;", "&raquo;", "&ldquo;", "&lsquo;", "&bdquo;", "&ldquo;", "&quot;", "&#171;", "&#187;"]
       utf8: [0x201E, 0x201C, 0x201F, 0x201D, 0x00AB, 0x00BB]
@@ -75,282 +88,8 @@ class Mdash.Lib
       html: ["&times;", "&#215;"]
       utf8: [0x00D7]
 
-  ###
-   * Добавление к тегам атрибута 'id', благодаря которому
-   * при повторном типографирование текста будут удалены теги,
-   * расставленные данным типографом
-   *
-   * @var array
-  ###
-  @typographSpecificTagId = false
-
-  @preg_quote = (str, delimiter) ->
-    String str
-      .replace new RegExp('[.\\\\+*?\\[\\^\\]$(){}!|:\\' + (delimiter || '') + '-]', 'g'), '\\$&'
-
-
-  @strip_tags = (input, allowed) ->
-    allowed = (((allowed || '') + '').toLowerCase().match(/<[a-z][a-z0-9]*>/g) || []).join('')
-    tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi
-    commentsAndPhpTags = /<!--[\s\S]*?-->|<\?(?:php)?[\s\S]*?\?>/gi
-
-    input.replace commentsAndPhpTags, ''
-      .replace tags, ($0, $1) ->
-        if allowed.indexOf('<' + $1.toLowerCase() + '>') > -1 then $0 else ''
-  
-
-
-  ###
-   * Костыли для работы с символами UTF-8
-   * 
-   * @author  somebody?
-   * @param int $c код символа в кодировке UTF-8 (например, 0x00AB)
-   * @return  bool|string
-  ###
-  @_getUnicodeChar = (c) ->
-    if c <= 0x7F
-      return String.fromCharCode(c)
-    else if c <= 0x7FF
-      return String.fromCharCode(0xC0 | c >> 6) + String.fromCharCode(0x80 | c & 0x3F)
-    else if c <= 0xFFFF
-      return String.fromCharCode(0xE0 | c >> 12) + String.fromCharCode(0x80 | c >> 6 & 0x3F) + String.fromCharCode(0x80 | c & 0x3F)
-    else if c <= 0x10FFFF
-      return String.fromCharCode(0xF0 | c >> 18) + String.fromCharCode(0x80 | c >> 12 & 0x3F) + String.fromCharCode(0x80 | c >> 6 & 0x3F) + String.fromCharCode(0x80 | c & 0x3F)
-    else
-      return false
-
-
-  ###
-   * Удаление кодов HTML из текста
-   *
-   * <code>
-   *  // Remove UTF-8 chars:
-   *  $str = Mdash.Lib::clear_special_chars('your text', 'utf8');
-   *  // ... or HTML codes only:
-   *  $str = Mdash.Lib::clear_special_chars('your text', 'html');
-   *  // ... or combo:
-   *  $str = Mdash.Lib::clear_special_chars('your text');
-   * </code>
-   *
-   * @param   string $text
-   * @param   mixed $mode
-   * @return  string|bool
-  ###
-  @clear_special_chars = (text, mode=null) ->
-    mode = [mode]  if _.isString mode
-    mode = ['utf8', 'html']  if not mode?
-    return false  if not _.isArray mode
-    moder = []
-
-    for mod in mode
-      moder.push mod  if mod in ['utf8','html']
-    return false  if moder.length is 0
-
-    for char, vals of @charsTable
-      for type in mode
-        if vals[type]?
-          for v in vals[type]
-            if type is 'utf8' and _.isFinite(v)
-              v = @_getUnicodeChar(v)
-
-            if type is 'html'
-              if v.match(/<[a-z]+>/gi)
-                v = @safe_tag_chars(v, true)
-
-            text = text.replace(new RegExp(v, 'ig'), char)  if v
-
-    return text
-  
-  ###
-   * Удаление тегов HTML из текста
-   * Тег <br /> будет преобразов в перенос строки \n, сочетание тегов </p><p> -
-   * в двойной перенос
-   *
-   * @param   string $text
-   * @param   array $allowableTag массив из тегов, которые будут проигнорированы
-   * @return  string
-  ###
-  @remove_html_tags = (text, allowableTag=null) ->
-    ignore = null
-    
-    if allowableTag?
-      allowableTag = [allowableTag]  if _.isString allowableTag
-
-      if _.isArray allowableTag
-        tags = []
-        for tag in allowableTag
-          continue  if tag.substr(0, 1) isnt '<' or tag.substr(-1, 1) isnt '>'
-          continue  if tag.substr(1, 1) is '/'
-          tags.push tag
-
-        ignore = tags.join('')
-
-    text = text.replace [/\<br\s*\/?>/gi, /\<\/p\>\s*\<p\>/g], ["\n","\n\n"]
-    text = @strip_tags text, ignore
-    text
-  
-  ###
-   * Сохраняем содержимое тегов HTML
-   *
-   * Тег 'a' кодируется со специальным префиксом для дальнейшей
-   * возможности выносить за него кавычки.
-   * 
-   * @param   string $text
-   * @param   bool $safe
-   * @return  string
-  ###
-  @safe_tag_chars = (text, way) ->
-    self = @
-    if way
-      text = text.replace /(\<\/?)(.+?)(\>)/g, ($0, $1, $2, $3) ->
-        $1 + (if $2.trim().substr(0, 1) is "a" then "%%%__" else "") + self.encrypt_tag($2.trim()) + $3
-    else
-      text = text.replace /(\<\/?)(.+?)(\>)/g, ($0, $1, $2, $3) ->
-        $1 + (if $2.trim().substr(0, 5) is "%%%__" then self.decrypt_tag($2.trim().substr(5)) else self.decrypt_tag($2.trim())) + $3
-    text
-    
-    
-  ###
-   * Декодриует спец блоки
-   *
-   * @param   string $text
-   * @return  string
-  ###
-  @decode_internal_blocks = (text) ->
-    self = @
-    text = text.replace new RegExp("#{@INTERNAL_BLOCK_OPEN}([a-zA-Z0-9\/=]+?)#{@INTERNAL_BLOCK_CLOSE}", 'g'), ($0, $1) ->
-      self.decrypt_tag($1)
-    text
-    
-  ###
-   * Кодирует спец блок
-   *
-   * @param   string $text
-   * @return  string
-  ###
-  @iblock = (text="") ->
-    "#{@INTERNAL_BLOCK_OPEN}#{@encrypt_tag(text)}#{@INTERNAL_BLOCK_CLOSE}"
-    
-    
-  ###
-   * Создание тега с защищенным содержимым 
-   *
-   * @param   string $content текст, который будет обрамлен тегом
-   * @param   string $tag тэг 
-   * @param   array $attribute список атрибутов, где ключ - имя атрибута, а значение - само значение данного атрибута
-   * @return  string
-  ###
-  @build_safe_tag = (content, tag='span', attribute={}, layout=@LAYOUT_STYLE) ->
-    htmlTag = tag
-  
-    if @_typographSpecificTagId
-      if not attribute.id?
-        attribute.id = 'mdash-2' + mt_rand(1000, 9999)
-    
-    classname = ""
-    if attribute.length
-      if layout & @LAYOUT_STYLE
-        if attribute.__style?
-          if attribute.style?
-            st = attribute.style.trim()
-            st += ";"  if st.substr(-1) isnt ";"
-            st += attribute.__style
-            attribute.style = st
-          else
-            attribute.style = attribute.__style
-
-          delete attribute['__style']
-
-      for attr, value of attribute
-        continue  if attr is "__style"
-        if attr is "class"
-          classname = "#{value}"
-          continue
-
-        htmlTag += " #{attr}=\"#{value}\""
-      
-    if layout & @LAYOUT_CLASS and classname
-      htmlTag += " class=\"#{classname}\""
-      
-    "<#{@encrypt_tag(htmlTag)}>#{content}</#{@encrypt_tag(tag)}>"
-
-    
-  ###
-   * Метод, осуществляющий кодирование (сохранение) информации
-   * с целью невозможности типографировать ее
-   *
-   * @param   string $text
-   * @return  string
-  ###
-  @encrypt_tag = (text) ->
-    new Buffer(text).toString('base64')
-
-  ###
-   * Метод, осуществляющий декодирование информации
-   *
-   * @param   string $text
-   * @return  string
-  ###
-  @decrypt_tag = (text) ->
-    new Buffer(text, 'base64').toString('utf8')
-    
-    
-  @strpos_ex = (haystack, needle, offset = null) ->
-    if _.isArray needle
-      m = -1
-      w = false
-
-      for n in needle
-        p = haystack.indexOf n, offset
-
-        continue  if p is -1
-
-        if m is -1
-          m = p
-          w = n
-          continue
-
-        if p < m
-          m = p
-          w = n
-
-      return false  if m is -1
-      return {pos: m, str: w}
-    haystack.indexOf needle, offset
-
-    
-  @processSelectorPattern = (pattern) ->
-    return  if pattern is false
-    pattern = @preg_quote(pattern, '/')
-    pattern = pattern.replace("\\*", "[a-z0-9_\-]*")
-    pattern = new RegExp("^#{pattern}$", 'ig')
-
-  @_test_pattern = (pattern, text) ->
-    return true  if pattern is false
-    return text.match(pattern)
-
-  
-  @strtolower = (string) ->
-    convert_to = [
-      "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", 
-      "v", "w", "x", "y", "z", "à", "á", "â", "ã", "ä", "å", "æ", "ç", "è", "é", "ê", "ë", "ì", "í", "î", "ï", 
-      "ð", "ñ", "ò", "ó", "ô", "õ", "ö", "ø", "ù", "ú", "û", "ü", "ý", "а", "б", "в", "г", "д", "е", "ё", "ж", 
-      "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", 
-      "ь", "э", "ю", "я" 
-    ]
-    convert_from = [
-      "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", 
-      "V", "W", "X", "Y", "Z", "À", "Á", "Â", "Ã", "Ä", "Å", "Æ", "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï", 
-      "Ð", "Ñ", "Ò", "Ó", "Ô", "Õ", "Ö", "Ø", "Ù", "Ú", "Û", "Ü", "Ý", "А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", 
-      "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ъ", 
-      "Ь", "Э", "Ю", "Я" 
-    ]
-    
-    string.replace(convert_from, convert_to)
-  
-
   # // взято с http://www.w3.org/TR/html4/sgml/entities.html
-  @html4_char_ents =
+  __htmlCharEnts =
     'nbsp': 160
     'iexcl': 161
     'cent': 162
@@ -603,32 +342,310 @@ class Mdash.Lib
     'lsaquo': 8249
     'rsaquo': 8250
     'euro': 8364
+
+
+  @preg_quote = (str, delimiter) ->
+    String str
+      .replace new RegExp('[.\\\\+*?\\[\\^\\]$(){}!|:\\' + (delimiter || '') + '-]', 'g'), '\\$&'
+
+
+  __stripTags = (input, allowed) ->
+    allowed = (((allowed || '') + '').toLowerCase().match(/<[a-z][a-z0-9]*>/g) || []).join('')
+    tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi
+    commentsAndPhpTags = /<!--[\s\S]*?-->|<\?(?:php)?[\s\S]*?\?>/gi
+
+    input
+      .replace commentsAndPhpTags, ''
+      .replace tags, ($0, $1) ->
+        if allowed.indexOf('<' + $1.toLowerCase() + '>') > -1 then $0 else ''
   
+  __test_pattern = (pattern, text) ->
+    return true  if pattern is false
+    return text.match(pattern)
+
+
   ###
-   * Вернуть уникод символ по html entinty
+   * Метод, осуществляющий кодирование (сохранение) информации
+   * с целью невозможности типографировать ее
    *
-   * @param string $entity
-   * @return string
+   * @param   string $text
+   * @return  string
   ###
-  @html_char_entity_to_unicode = (entity) ->
-    return @_getUnicodeChar(@html4_char_ents[entity])  if @html4_char_ents[entity]?
-    return false
+  @encode = (text) ->
+    new Buffer(text).toString('base64')
+
+  ###
+   * Метод, осуществляющий декодирование информации
+   *
+   * @param   string $text
+   * @return  string
+  ###
+  @decode = (text) ->
+    new Buffer(text, 'base64').toString('utf8')
+    
+
+
+  ###
+   * Удаление кодов HTML из текста
+  ###
+  @clearSpecialChars = (text, mode=null) ->
+    mode = [mode]  if typeof mode is 'string'
+    mode = ['utf8', 'html']  if not mode?
+    return false  if not Array.isArray mode
+
+    moder = []
+    moder.push mod  if mod in ['utf8','html']  for mod in mode
+
+    return false  if moder.length is 0
+
+    for char, vals of __charsTable
+      for type in mode
+        if vals[type]?
+          for v in vals[type]
+            v = String.fromCharCode(v)  if type is 'utf8' and not isNaN(v)
+            v = @safeTagChars(v, true)  if type is 'html' and /<[a-z]+>/gi.test(v)
+            text = text.replace(new RegExp(v, 'ig'), char)  if v?
+
+    text
   
+  ###
+   * Удаление тегов HTML из текста
+   * Тег <br /> будет преобразов в перенос строки \n, сочетание тегов </p><p> -
+   * в двойной перенос
+   *
+   * @param   string $text
+   * @param   array $allowableTag массив из тегов, которые будут проигнорированы
+   * @return  string
+  ###
+  @removeHtmlTags = (text, allowableTag=null) ->
+    ignore = null
+    
+    if allowableTag?
+      allowableTag = [allowableTag]  if typeof allowableTag is 'string'
+
+      if Array.isArray allowableTag
+        tags = []
+        for tag in allowableTag
+          continue  if tag.substr(0, 1) isnt '<' or tag.substr(-1, 1) isnt '>'
+          continue  if tag.substr(1, 1) is '/'
+          tags.push tag
+
+        ignore = tags.join('')
+
+    text = text.replace [/\<br\s*\/?>/gi, /\<\/p\>\s*\<p\>/g], ["\n","\n\n"]
+    text = __stripTags text, ignore
+    text
+  
+  ###
+   * Сохраняем содержимое тегов HTML
+   *
+   * Тег 'a' кодируется со специальным префиксом для дальнейшей
+   * возможности выносить за него кавычки.
+   * 
+   * @param   string $text
+   * @param   bool $safe
+   * @return  string
+  ###
+  @processTags = (text, processor=((txt)->txt)) ->
+    text.replace /(\<\/?)(.+?)(\>)/gi, ($0, $1, $2, $3) ->
+      $2 = "#{$2}".trim()
+      
+      if $2.substr(0, 1) is "a"
+        $2 = "%%%__" + processor($2)  
+      else if $2.substr(0, 5) is "%%%__"
+        $2 = processor($2.substr(5))
+      else
+        $2 = processor($2)
+
+      "#{$1}#{$2}#{$3}"
+    
+  ###
+   * Add Safe block/tag for exclusion
+  ###
+  @addSafeBlock = (id, tag) ->
+    if not tag?
+      tag = []
+      tag.push "<#{id}[^>]*?>"
+      tag.push "</#{id}>"
+
+    tag.map (str) ->
+      String(str).replace new RegExp('[.\\\\+*?\\[\\^\\]$(){}!|:\\/-]', 'g'), '\\$&'
+
+    pattern = new RegExp "(#{tag[0]})((?:.|\\n|\\r)*?)(#{tag[1]})", "ig"
+
+    {id: id, pattern: pattern}
+
+  @processSafeBlocks = (text, blocks=[], processor=((txt)->txt), reverse=false) ->
+    for block in (if reverse then blocks.reverse() else blocks)
+      text = text.replace block.pattern, ($0, $1, $2, $3) ->
+        $1 + processor($2) + $3
+    text
+
+    return text
+
+
+  @selectRules = (mask="*", rules={}) ->
+    selected = {}
+    mask = [mask]  if typeof mask is 'string'
+
+    for m in mask
+      m = m.split(".")
+      name = m[0]
+      pattern = @processSelectorPattern(name)
+
+      Object.keys(rules).map (key) ->
+        selected[key] = rules[key]  if key.match pattern
+        return
+
+      selected[name] = @selectRules(m.slice(1).join("."), rules[name])  if m.length > 1 and selected[name]?
+    selected
+
+
+  @processSettings = (options={}, defaults={}) ->
+    return options if typeof options isnt 'object'
+
+    settings = {}
+
+    for selector, value of options
+      value = true   if "#{value}".toLowerCase() in ["on", "true", "1", "direct"]
+      value = false  if "#{value}".toLowerCase() in ["off", "false", "0"]
+      value = {disabled: (value is false)}  if typeof value is 'boolean'
+
+      if typeof value is 'object'
+        if defaults[selector]? and typeof defaults[selector] is 'object'
+          # TODO: remove undescore
+          value = _.defaults _.omit(value, 'selector'), _.omit(defaults[selector], 'disabled')
+
+        if 'description' of value
+          delete value['description']
+
+        if 'hide' of value
+          delete value['hide']
+
+        if 'setting' of value
+          value[value.setting] = true
+          delete value['setting']
+
+        if 'disabled' not of value and Object.keys(value).length is 0
+          value.disabled = false
+
+        if 'selector' of value
+          continue  if Object.keys(value).length is 1
+
+          value.selector = [value.selector]  if typeof value.selector is 'string'
+          val = _.omit(value, 'selector')
+
+          if Object.keys(value).length > 2
+            if value['disabled'] is true
+              continue
+            else
+              val = _.omit(val, 'disabled')
+
+          for select in value.selector
+            settings[select] = _.extend {}, val, settings[select]
+          continue
+
+        value = _.omit(value, 'selector')
+
+      settings[selector] = _.extend {}, value, settings[selector]
+    settings
+
+  ###
+   * Декодриует спец блоки
+   *
+   * @param   string $text
+   * @return  string
+  ###
+  @decodeInternalBlocks = (text) ->
+    self = @
+    text = text.replace new RegExp("#{@INTERNAL_BLOCK_OPEN}([a-zA-Z0-9\/=]+?)#{@INTERNAL_BLOCK_CLOSE}", 'g'), ($0, $1) ->
+      self.decode($1)
+    text
+    
+  ###
+   * Кодирует спец блок
+   *
+   * @param   string $text
+   * @return  string
+  ###
+  @iblock = (text="") ->
+    "#{@INTERNAL_BLOCK_OPEN}#{@encode(text)}#{@INTERNAL_BLOCK_CLOSE}"
+    
+    
+  ###
+   * Создание тега с защищенным содержимым 
+   *
+   * @param   string $content текст, который будет обрамлен тегом
+   * @param   string $tag тэг 
+   * @param   array $attribute список атрибутов, где ключ - имя атрибута, а значение - само значение данного атрибута
+   * @return  string
+  ###
+  @tag = (content, tag='span', attribute={}, layout=@layout) ->
+    if attribute.class? and attribute.class is "nowrap"
+      classname = attribute.class
+      tag = "nobr"
+      attribute = {}
+
+    if layout is @LAYOUT_STYLE or layout is 0
+      delete attribute['class']  if attribute['class']?
+    else if layout is @LAYOUT_CLASS or layout is 0
+      delete attribute['style']  if attribute['style']?
+
+    if attribute.class?
+      classname = (if @layoutClassPrefix then @layoutClassPrefix else "") + classname
+      attribute.class = classname
+      classname = ""
+    
+    if attribute.id? and @layoutTagId
+      attribute.id = 'mdash-3' + Math.floor(Math.random() * (9999 - 1000)) + 1000
+    
+    openTag = closeTag = tag
+    openTag += " #{attr}=\"#{value}\""  for attr, value of attribute
+      
+    "<#{@encode(openTag)}>#{content}</#{@encode(closeTag)}>"
+
+
+  @processSelectorPattern = (pattern) ->
+    return  if pattern is false
+    pattern = @preg_quote(pattern, '/')
+    pattern = pattern.replace("\\*", "[a-z0-9_\-]*")
+    pattern = new RegExp("^#{pattern}$", 'ig')
+    pattern
+
+  # @strtolower = (string) ->
+  #   convert_to = [
+  #     "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", 
+  #     "v", "w", "x", "y", "z", "à", "á", "â", "ã", "ä", "å", "æ", "ç", "è", "é", "ê", "ë", "ì", "í", "î", "ï", 
+  #     "ð", "ñ", "ò", "ó", "ô", "õ", "ö", "ø", "ù", "ú", "û", "ü", "ý", "а", "б", "в", "г", "д", "е", "ё", "ж", 
+  #     "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", 
+  #     "ь", "э", "ю", "я" 
+  #   ]
+  #   convert_from = [
+  #     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", 
+  #     "V", "W", "X", "Y", "Z", "À", "Á", "Â", "Ã", "Ä", "Å", "Æ", "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï", 
+  #     "Ð", "Ñ", "Ò", "Ó", "Ô", "Õ", "Ö", "Ø", "Ù", "Ú", "Û", "Ü", "Ý", "А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", 
+  #     "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ъ", 
+  #     "Ь", "Э", "Ю", "Я" 
+  #   ]
+    
+  #   string.replace(convert_from, convert_to)
+  
+
   ###
    * Сконвериторвать все html entity в соответсвующие юникод символы
    *
    * @param string $text
   ###
-  @convert_html_entities_to_unicode = (text) ->
+  @convertEntitiesToUnicode = (text) ->
     text = text.replace /\&#([0-9]+)\;/g, (match, m) ->
-      Mdash.Lib._getUnicodeChar(parseInt(m))
+      String.fromCharCode(parseInt(m))
 
     text = text.replace /\&#x([0-9A-F]+)\;/g, (match, m) ->
-      Mdash.Lib._getUnicodeChar(parseInt(m, 16))
+      String.fromCharCode(parseInt(m, 16))
 
     text = text.replace /\&([a-zA-Z0-9]+)\;/g, (match, m) ->
-      r = Mdash.Lib.html_char_entity_to_unicode(m)
-      return r or match
+      r = String.fromCharCode(__htmlCharEnts[m])  if __htmlCharEnts[m]?
+      r or match
     text
   
   @rstrpos = (haystack, needle, offset=0) ->

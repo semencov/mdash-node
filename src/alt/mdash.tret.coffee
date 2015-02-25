@@ -12,20 +12,23 @@ class Mdash.Tret
   apply: (text) ->
     self = @
 
-    log "Running tret #{@constructor.name}...".bgGreen.black
+    console.log "\nTRET\t#{@constructor.name}...".yellow
 
     for id, rule of @rules
-      log "Running rule #{id}...".green
-      log "Rule #{id} is disabled.".grey  if rule.disabled
+      if rule.disabled
+        console.log "RULE\t#{id}...\tDisabled.".grey
+      else
+        console.log "RULE\t#{id}...".green
       continue  if rule.disabled
 
       if rule.function?
-        result = rule.function.call self, text
-        log "Rule #{id} has custom function"
+        result = rule.function.call self, text, rule
+        console.log "\t# Custom function"
+
         if typeof result isnt 'string'
           throw new Error("Custom function returned wrong result")
-          return text
-        return result
+          continue
+        text = result
 
       if rule.pattern?
         for k, pattern of rule.pattern
@@ -34,7 +37,7 @@ class Mdash.Tret
           result = text.replace pattern, if typeof replacement is 'string' then replacement else () ->
             global["$#{i}"] = arguments[i]  for i in [0...arguments.length]
 
-            log "Rule #{id} match pattern ##{k}\t'#{$0}'\t\t'" + replacement.call(self) + "'"
+            console.log "\t# Matched pattern ##{k}\t'"+ $0.dim.white + "' → '" + replacement.call(self).dim.white + "'"
             replacement.call self
 
           text = result  if typeof result is 'string'
@@ -56,7 +59,6 @@ class Mdash.Tret
         settings[rule][key] = value
     else if arguments.length is 1 and typeof arguments[0] is 'object'
       settings = arguments[0]
-
 
     for id, rule of @rules
       continue  if not settings[id]?

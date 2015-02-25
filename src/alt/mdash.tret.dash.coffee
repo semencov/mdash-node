@@ -16,7 +16,7 @@ class Mdash.Tret.Dash extends Mdash.Tret
     # Тире после кавычек, скобочек, пунктуации
     mdash:
       pattern: [
-        /([a-zа-яё0-9]+|\,|\:|\)|\&(ra|ld)quo\;|\|\"|\>)(\040|\t)(—|\-|\&mdash\;)(\s|$|\<)/gi
+        /([a-zа-яё0-9]+|\,|\:|\)|\&(ra|ld)quo\;|\"|\>)(\s|\t)(—|\-|\&mdash\;)(\s|$|\<)/gi
         /(\,|\:|\)|\")(—|\-|\&mdash\;)(\s|$|\<)/gi
       ]
       replacement: [
@@ -27,7 +27,7 @@ class Mdash.Tret.Dash extends Mdash.Tret
     # Тире после переноса строки
     mdash_2:
       pattern: [
-        /(\n|\r|^|\>)(\-|\&mdash\;)(\t|\040)/gm
+        /(\n|\r|^|\>)(\-|\&mdash\;)(\t|\s)/gm
       ]
       replacement: [
         -> "#{$1}&mdash;&nbsp;"
@@ -36,7 +36,7 @@ class Mdash.Tret.Dash extends Mdash.Tret
     # Тире после знаков восклицания, троеточия и прочее
     mdash_3:
       pattern: [
-        /(\.|\!|\?|\&hellip\;)(\040|\t|\&nbsp\;)(\-|\&mdash\;)(\040|\t|\&nbsp\;)/g
+        /(\.|\!|\?|\&hellip\;)(\s|\t|\&nbsp\;)(\-|\&mdash\;)(\s|\t|\&nbsp\;)/g
       ]
       replacement: [
         -> "#{$1} &mdash;&nbsp;"
@@ -45,7 +45,7 @@ class Mdash.Tret.Dash extends Mdash.Tret
     # Расстановка дефисов между из-за, из-под
     iz_za_pod:
       pattern: [
-        /(\s|\&nbsp\;|\>|^)(из)(\040|\t|\&nbsp\;)\-?(за|под)([\.\,\!\?\:\;]|\040|\&nbsp\;)/gi
+        /(\s|\&nbsp\;|\>|^)(из)(\s|\t|\&nbsp\;)\-?(за|под)([\.\,\!\?\:\;]|\s|\&nbsp\;)/gi
       ]
       replacement: [
         -> (if $1 is "&nbsp;" then " " else $1) + "#{$2}-#{$4}" + (if $5 is "&nbsp;" then " " else $5)
@@ -53,9 +53,8 @@ class Mdash.Tret.Dash extends Mdash.Tret
 
     # Автоматическая простановка дефисов в обезличенных местоимениях и междометиях
     to_libo_nibud:
-      cycled: true
       pattern: [
-        /(\s|^|\&nbsp\;|\>)(кто|кем|когда|зачем|почему|как|что|чем|где|чего|кого)\-?(\040|\t|\&nbsp\;)\-?(то|либо|нибудь)([\.\,\!\?\;]|\040|\&nbsp\;|$)/gi
+        /(\s|^|\&nbsp\;|\>)(кто|кем|когда|зачем|почему|как|что|чем|где|чего|кого)\-?(\s|\t|\&nbsp\;)\-?(то|либо|нибудь)([\.\,\!\?\;]|\s|\&nbsp\;|$)/gi
       ]
       replacement: [
         -> (if $1 is "&nbsp;" then " " else $1) + "#{$2}-#{$4}" + (if $5 is "&nbsp;" then " " else $5)
@@ -63,11 +62,10 @@ class Mdash.Tret.Dash extends Mdash.Tret
 
     # Кое-как, кой-кого, все-таки
     koe_kak:
-      cycled: true
       pattern: [
-        /(\s|^|\&nbsp\;|\>)(кое)\-?(\040|\t|\&nbsp\;)\-?(как)([\.\,\!\?\;]|\040|\&nbsp\;|$)/gi
-        /(\s|^|\&nbsp\;|\>)(кой)\-?(\040|\t|\&nbsp\;)\-?(кого)([\.\,\!\?\;]|\040|\&nbsp\;|$)/gi
-        /(\s|^|\&nbsp\;|\>)(вс[её])\-?(\040|\t|\&nbsp\;)\-?(таки)([\.\,\!\?\;]|\040|\&nbsp\;|$)/gi
+        /(\s|^|\&nbsp\;|\>)(кое)\-?(\s|\t|\&nbsp\;)\-?(как)([\.\,\!\?\;]|\s|\&nbsp\;|$)/gi
+        /(\s|^|\&nbsp\;|\>)(кой)\-?(\s|\t|\&nbsp\;)\-?(кого)([\.\,\!\?\;]|\s|\&nbsp\;|$)/gi
+        /(\s|^|\&nbsp\;|\>)(вс[её])\-?(\s|\t|\&nbsp\;)\-?(таки)([\.\,\!\?\;]|\s|\&nbsp\;|$)/gi
       ]
       replacement: [
         -> (if $1 is "&nbsp;" then " " else $1) + "#{$2}-#{$4}" + (if $5 is "&nbsp;" then " " else $5)
@@ -75,11 +73,10 @@ class Mdash.Tret.Dash extends Mdash.Tret
 
     # Расстановка дефисов с частицами ка, де, кась
     ka_de_kas:
-      disabled: true
       pattern: [
-        /(\s|^|\&nbsp\;|\>)([а-яё]+)(\040|\t|\&nbsp\;)(ка)([\.\,\!\?\;]|\040|\&nbsp\;|$)/gi
-        /(\s|^|\&nbsp\;|\>)([а-яё]+)(\040|\t|\&nbsp\;)(де)([\.\,\!\?\;]|\040|\&nbsp\;|$)/gi
-        /(\s|^|\&nbsp\;|\>)([а-яё]+)(\040|\t|\&nbsp\;)(кась)([\.\,\!\?\;]|\040|\&nbsp\;|$)/gi
+        /(\s|^|\&nbsp\;|\>)([а-яё]+)(\s|\t|\&nbsp\;)(ка)([\.\,\!\?\;]|\s|\&nbsp\;|$)/gi
+        /(\s|^|\&nbsp\;|\>)([а-яё]+)(\s|\t|\&nbsp\;)(де)([\.\,\!\?\;]|\s|\&nbsp\;|$)/gi
+        /(\s|^|\&nbsp\;|\>)([а-яё]+)(\s|\t|\&nbsp\;)(кась)([\.\,\!\?\;]|\s|\&nbsp\;|$)/gi
       ]
       replacement: [
         -> (if $1 is "&nbsp;" then " " else $1) + "#{$2}-#{$4}" + (if $5 is "&nbsp;" then " " else $5)
