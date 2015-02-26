@@ -85,10 +85,10 @@ By default some rules (eg. rules for Optical Alignment) put additional HTML tags
 Mdash.setLayout(Mdash.LAYOUT_STYLE);
 ```
 
-Otherwise if you would like to avoid any styling:
+Or you can set styles to go both inline and in class:
 
 ```javascript
-Mdash.setLayout(Mdash.LAYOUT_STYLE|Mdash.LAYOUT_STYLE);
+Mdash.setLayout(Mdash.LAYOUT_STYLE|Mdash.LAYOUT_CLASS);
 ```
 
 And to set class prefix (by default it is `'mdash-'`):
