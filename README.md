@@ -35,18 +35,18 @@ Also you can get the list of trets and rules:
 var typo = new Mdash();
 var trets = typo.getTretNames();
 
-// ['Abbr',
-//  'Dash',
-//  'Date',
-//  'Etc',
-//  'Nobr',
-//  'Number',
-//  'OptAlign',
-//  'Punctmark',
-//  'Quote',
-//  'Space',
-//  'Symbol',
-//  'Text']
+// [ 'Text',
+//   'Space',
+//   'Number',
+//   'Quote',
+//   'Punctmark',
+//   'Date',
+//   'Symbol',
+//   'Nobr',
+//   'Dash',
+//   'Abbr',
+//   'OptAlign',
+//   'Etc' ]
 ```
 
 Get rules for all tret or specific one with it's enabled/disabled status (if `false` the rule won't be applied):
@@ -56,16 +56,16 @@ var typo = new Mdash();
 var rules = typo.getRuleNames();  // Get all rules
 
 var dash = typo.getRuleNames('Dash');    // Specify a tret as argument
+
 // { Dash:
-//   ['mdash_symbol_to_html_mdash',
-//    'mdash',
-//    'mdash_2',
-//    'mdash_3',
-//    'iz_za_pod',
-//    'to_libo_nibud',
-//    'koe_kak',
-//    'ka_de_kas']
-// }
+//    [ 'mdash_symbol_to_html_mdash',
+//      'mdash',
+//      'mdash_2',
+//      'mdash_3',
+//      'iz_za_pod',
+//      'to_libo_nibud',
+//      'koe_kak',
+//      'ka_de_kas' ] }
 ```
 
 You can get current settings of the typograph:
@@ -75,8 +75,15 @@ var typo = new Mdash();
 var settings = typo.getSettings();
 
 // { Quote: { no_bdquotes: false, no_inches: false },
-//   '*': { nowrap: true },
-//   OptAlign: { disabled: true } }
+//   OptAlign: { disabled: true },
+//   Text: { disabled: true },
+//   'Dash.ka_de_kas': { disabled: true },
+//   'Date.mdash_month_interval': { disabled: true },
+//   'Date.nbsp_and_dash_month_interval': { disabled: true },
+//   'Nobr.hyphen_nowrap_in_small_words': { disabled: true },
+//   'Nobr.hyphen_nowrap': { disabled: true },
+//   'Punctmark.dot_on_end': { disabled: true },
+//   'OptAlign.oa_obracket_coma': { disabled: true } }
 ```
 
 ### Module Settings
