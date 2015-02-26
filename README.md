@@ -79,6 +79,8 @@ var settings = typo.getSettings();
 //   OptAlign: { disabled: true } }
 ```
 
+### Module Settings
+
 By default some rules (eg. rules for Optical Alignment) put additional HTML tags in your text with inline styles. If you would like to put styles in separate classes, use this:
 
 ```javascript
@@ -97,7 +99,7 @@ And to set class prefix (by default it is `'mdash-'`):
 Mdash.setLayoutClassPrefix('typo-');
 ```
 
-### Settings
+### Rules Settings
 All settings are usualy just the rule names with tret name as the namespace, so mainly you can enable or disable some of them. Also you can specify some options for the rule or specify some virtual settings for different rules. To disable some rule you can pass the arguments object where key is rulename (with namespace — tret name) and the value is `false`. For example, we want to disable rule `oa_obracket_coma` in namespace `OptAlign`:
 
 ```javascript
@@ -221,7 +223,7 @@ You can specify global settings by putting simple JSON file `.mdash` in the root
 }
 ```
 
-This settings will override the default, but will be overriden by options you'll supply to instance.
+This settings will override the default, but will be overriden by options you'll pass to instance.
 
 
 ## License
