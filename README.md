@@ -1,15 +1,18 @@
 # mdash
 
-This is Node.js port of the original Typograph ([http://mdash.ru](mdash.ru)) by Evgeny Muravjev & Alexander Drutsa
+This is Node.js port of the original Russian Typograph ([mdash.ru](http://mdash.ru/)) by Evgeny Muravjev & Alexander Drutsa
 
 ## Getting Started
-Install the module with: `npm install mdash-node`
+Install the module with:
+```bash
+npm install mdash-node
+```
 
 ## Documentation
-Currently this is a port from PHP library which fully immitates its behavior excluding debuging and custom builds. So you can check the original documentation on [http://mdash.ru](mdash.ru). Optimizations and improvements will follow. All formatting rules can be found on [http://mdash.ru/rules.html](mdash.ru/rules.html) (Russian).
+Currently this is a port from PHP library which fully immitates its behavior excluding debuging and custom builds. So you can check the original documentation on [mdash.ru](http://mdash.ru/). Optimizations and improvements will follow. All formatting rules can be found on [mdash.ru/rules.html](http://mdash.ru/rules.html) (Russian).
 
 ### Usage
-The lib can accept settings either with new instance or as args to the format method.
+The module can accept rules settings either with new instance or as args to the format method.
 
 ```javascript
 var Mdash = require('mdash-node');
@@ -32,7 +35,7 @@ Also you can get the list of trets and rules:
 var typo = new Mdash();
 var trets = typo.getTretNames();
 
-//[ 'Abbr',
+// ['Abbr',
 //  'Dash',
 //  'Date',
 //  'Etc',
@@ -43,7 +46,7 @@ var trets = typo.getTretNames();
 //  'Quote',
 //  'Space',
 //  'Symbol',
-//  'Text' ]
+//  'Text']
 ```
 
 Get rules for all tret or specific one with it's enabled/disabled status (if `false` the rule won't be applied):
@@ -53,15 +56,16 @@ var typo = new Mdash();
 var rules = typo.getRuleNames();  // Get all rules
 
 var dash = typo.getRuleNames('Dash');    // Specify a tret as argument
-// { Dash: 
-//    { mdash_symbol_to_html_mdash: true,
-//      mdash: true,
-//      mdash_2: true,
-//      mdash_3: true,
-//      iz_za_pod: true,
-//      to_libo_nibud: true,
-//      koe_kak: true,
-//      ka_de_kas: false } }
+// { Dash:
+//   ['mdash_symbol_to_html_mdash',
+//    'mdash',
+//    'mdash_2',
+//    'mdash_3',
+//    'iz_za_pod',
+//    'to_libo_nibud',
+//    'koe_kak',
+//    'ka_de_kas']
+// }
 ```
 
 You can get current settings of the typograph:
@@ -84,10 +88,10 @@ Mdash.setLayout(Mdash.LAYOUT_STYLE);
 Otherwise if you would like to avoid any styling:
 
 ```javascript
-Mdash.setLayout(0);
+Mdash.setLayout(Mdash.LAYOUT_STYLE|Mdash.LAYOUT_STYLE);
 ```
 
-And to set class prefix (by default it is 'mdash-'):
+And to set class prefix (by default it is `'mdash-'`):
 
 ```javascript
 Mdash.setLayoutClassPrefix('typo-');
