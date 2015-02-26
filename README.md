@@ -12,24 +12,25 @@ Currently this is a port from PHP library which fully immitates its behavior exc
 The lib can accept settings either with new instance or as args to the format method.
 
 ```javascript
-var mdash = require('mdash-node');
+var Mdash = require('mdash-node');
 
-var a = new mdash("Типографика - это круто!");
+var a = new Mdash("Типографика - это круто!");
 console.log(a.format());  // <p>Типографика&nbsp;&mdash; это круто!</p>
 
-var b = new mdash("Типографика - это круто!", {'Text.paragraphs': false});
+var b = new Mdash("Типографика - это круто!", {'Text.paragraphs': false});
 console.log(b.format());  // Типографика&nbsp;&mdash; это круто!
 
-var c = new mdash({'Text.paragraphs': false});
+var c = new Mdash({'Text.paragraphs': false});
 console.log(c.format("Типографика - это круто!"));  // Типографика&nbsp;&mdash; это круто!
 
-console.log(mdash.format("Типографика - это круто!", {'Text.paragraphs': false}));  // Типографика&nbsp;&mdash; это круто!
+console.log(Mdash.format("Типографика - это круто!", {'Text.paragraphs': false}));  // Типографика&nbsp;&mdash; это круто!
 ```
 
 Also you can get the list of trets and rules:
 
 ```javascript
-var trets = mdash.getTretNames();
+var typo = new Mdash();
+var trets = typo.getTretNames();
 
 //[ 'Abbr',
 //  'Dash',
@@ -48,9 +49,10 @@ var trets = mdash.getTretNames();
 Get rules for all tret or specific one with it's enabled/disabled status (if `false` the rule won't be applied):
 
 ```javascript
-var rules = mdash.getRuleNames();  // Get all rules
+var typo = new Mdash();
+var rules = typo.getRuleNames();  // Get all rules
 
-var dash = mdash.getRuleNames('Dash');    // Specify a tret as argument
+var dash = typo.getRuleNames('Dash');    // Specify a tret as argument
 // { Dash: 
 //    { mdash_symbol_to_html_mdash: true,
 //      mdash: true,
@@ -65,7 +67,8 @@ var dash = mdash.getRuleNames('Dash');    // Specify a tret as argument
 You can get current settings of the typograph:
 
 ```javascript
-var settings = mdash.getSettings();
+var typo = new Mdash();
+var settings = typo.getSettings();
 
 // { Quote: { no_bdquotes: false, no_inches: false },
 //   '*': { nowrap: true },
@@ -75,19 +78,19 @@ var settings = mdash.getSettings();
 By default some rules (eg. rules for Optical Alignment) put additional HTML tags in your text with inline styles. If you would like to put styles in separate classes, use this:
 
 ```javascript
-mdash.setLayout('class');
+Mdash.setLayout(Mdash.LAYOUT_STYLE);
 ```
 
 Otherwise if you would like to avoid any styling:
 
 ```javascript
-mdash.setLayout(false);
+Mdash.setLayout(0);
 ```
 
 And to set class prefix (by default it is 'mdash-'):
 
 ```javascript
-mdash.setLayoutClassPrefix('typo-');
+Mdash.setLayoutClassPrefix('typo-');
 ```
 
 ### Settings
@@ -127,7 +130,7 @@ There is no such rule as `Etc.unicode`, however if we will pass this as setting 
 For example, to turn on convertion of the HTML entities in unicode characters we can put this in settings:
 
 ```javascript
-var typo = new mdash({
+var typo = new Mdash({
   'Etc.unicode': true
 });
 ```
@@ -135,7 +138,7 @@ var typo = new mdash({
 Or if we would like to disable all rules which puts space after punctuation marks:
 
 ```javascript
-var typo = new mdash({
+var typo = new Mdash({
   'Space.autospace_after': false
 });
 ```
@@ -143,7 +146,7 @@ var typo = new mdash({
 Which is equal to this settings for the real rules:
 
 ```javascript
-var typo = new mdash({
+var typo = new Mdash({
   'Space.autospace_after_comma': false,
   'Space.autospace_after_pmarks': false,
   'Space.autospace_after_dot': false,
