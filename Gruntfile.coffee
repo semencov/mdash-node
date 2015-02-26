@@ -23,7 +23,7 @@ module.exports = (grunt) ->
 
     coffee:
       options:
-        bare: true
+        # bare: true
         expand: true
       lib:
         cwd: 'src/'
@@ -35,15 +35,11 @@ module.exports = (grunt) ->
             'src/lib/mdash.tret.*.coffee'
           ]
       alt:
-        cwd: 'src/'
-        files:
-          'lib/mdash_alt.js': [
-            'src/alt/mdash.coffee'
-            'src/alt/mdash.lib.coffee'
-            'src/alt/mdash.tret.coffee'
-            'src/alt/mdash.tret.*.coffee'
-            'src/alt/mdash.rule.coffee'
-          ]
+        expand: true
+        cwd: 'src/alt/'
+        src: ['**/*.coffee']
+        dest: 'alt/'
+        ext: '.js'
       test:
         expand: true
         cwd: 'src/test/'

@@ -111,6 +111,9 @@ In case we need to specify some options inside the rules or to apply some method
 
 ```javascript
 {
+  'Space.autospace_after': {
+    selector: 'Space.autospace_after_*'
+  },
   'Etc.unicode': {
     selector: '*',
     dounicode: true,
@@ -120,6 +123,34 @@ In case we need to specify some options inside the rules or to apply some method
 ```
 
 There is no such rule as `Etc.unicode`, however if we will pass this as setting to the lib, the option `dounicode` will be applied to the rules specified in `selector` (to all rules in this case). Also switching `disabled` will either enable or disable it.
+
+For example, to turn on convertion of the HTML entities in unicode characters we can put this in settings:
+
+```javascript
+var typo = new mdash({
+  'Etc.unicode': true
+});
+```
+
+Or if we would like to disable all rules which puts space after punctuation marks:
+
+```javascript
+var typo = new mdash({
+  'Space.autospace_after': false
+});
+```
+
+Which is equal to this settings for the real rules:
+
+```javascript
+var typo = new mdash({
+  'Space.autospace_after_comma': false,
+  'Space.autospace_after_pmarks': false,
+  'Space.autospace_after_dot': false,
+  'Space.autospace_after_hellips': false
+});
+```
+
 
 There are several presets and predefined "virtual" options:
 
@@ -168,14 +199,6 @@ Mdash.prototype.presets = {
     disabled: true
   }
 };
-```
-
-For example, to turn on convertion of the HTML entities in unicode characters we can put this in settings:
-
-```javascript
-var c = new mdash({
-  'Etc.unicode': true
-});
 ```
 
 ### .mdash
