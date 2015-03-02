@@ -653,6 +653,25 @@ exports.tag = (content, tag='span', attribute={}) ->
 
   "<#{exports.encode(openTag)}>#{content}</#{exports.encode(closeTag)}>"
 
+###
+ * Получить содержимое <style></style> при использовании классов
+ * 
+ * @param bool $list false - вернуть в виде строки для style или как массив
+ * @param bool $compact не выводить пустые классы
+ * @return string|array
+###
+exports.styles = (list=false) ->
+  res = {}
+
+  for classname, style of __classes
+    classname = (exports.LAYOUT_CLASS_PREFIX or "") + classname
+    res[classname] = style
+
+  return res  if list
+
+  css = ""
+  css += ".#{k} { #{v} }\n"  for k, v of res
+  return css
 
 ###
  * Сконвериторвать все html entity в соответсвующие юникод символы
@@ -665,7 +684,7 @@ exports.convertEntitiesToUnicode = (text) ->
   text = text.replace /\&#x([0-9A-F]+)\;/g, (match, m) ->
     String.fromCharCode(parseInt(m, 16))
   text = text.replace /\&([a-zA-Z0-9]+)\;/g, (match, m) ->
-    r = String.fromCharCode(htmlCharEnts[m])  if htmlCharEnts[m]?
+    r = String.fromCharCode(__htmlCharEnts[m])  if __htmlCharEnts[m]?
     r or match
   text
 

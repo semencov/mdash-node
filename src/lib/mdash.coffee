@@ -1,11 +1,9 @@
 ###
-
 mdash
 https://github.com/semencov/mdash-node
 
 Copyright (c) 2015 Yuri Sementsov
 Licensed under the MIT license.
-
 ###
 
 'use strict'
@@ -38,14 +36,11 @@ readFile = (filepath) ->
     contents = fs.readFileSync(String(filepath))
     try
       result = JSON.parse(contents)
-      console.log "FILE\tFound .mdash file with settings.\n".blue, result
     catch e
-      console.log "ERROR\t".bold.red, e
-      return
+      return {}
     return result
   catch e
-    return
-  return
+    return {}
 
 
 
@@ -84,7 +79,8 @@ module.exports = class Mdash
       selector  : '*'
       dounicode : true      # Преобразовывать html-сущности в юникод
       disabled  : true
- 
+
+
   constructor: (text, options={}) ->
     self = @
 
@@ -92,7 +88,7 @@ module.exports = class Mdash
       options = text
       text = null
 
-    options = Lib.merge (readFile(settingsFile) or {}), options
+    options = Lib.merge readFile(settingsFile), options
 
     @inited = false
     @text = text
@@ -113,12 +109,6 @@ module.exports = class Mdash
     @tretsOrder.sort (a, b) ->
       self.trets[a].order - self.trets[b].order
 
-    @use_layout = false
-    @class_layout_prefix = false
-    @use_layout_set = false
-    @disable_notg_replace = false
-    @remove_notg = false
-    
     @settings = {}
     @blocks = []
 
@@ -131,7 +121,7 @@ module.exports = class Mdash
    *
    * @param string $text
   ###
-  setText: (text) ->
+  setText: (text="") ->
     @text = text
   
   ###
@@ -176,6 +166,14 @@ module.exports = class Mdash
     options = Lib.processSettings(options, @presets)
 
     for selector, value of options
+      if value['disabled']?
+        for k, v of @settings
+          if new RegExp("^#{selector}\.", 'i').test(k) and v['disabled']?
+            if Object.keys(v).length is 1
+              delete @settings[k]
+            else
+              @settings[k]['disabled'] = value['disabled']
+
       value = Lib.merge(@settings[selector] or {}, value) or {}
       @settings[selector] = value   if Object.keys(value).length > 0
 
@@ -189,10 +187,7 @@ module.exports = class Mdash
       for tret, rules of ruleList
         settings[tret] = {}  if not settings[tret]?
         for rule in rules
-          if (value['disabled']) or settings[tret][rule]?['disabled']
-            settings[tret][rule] = {disabled: true}
-          else
-            settings[tret][rule] = (if settings[tret][rule]? then Lib.merge(settings[tret][rule], value) else value)
+          settings[tret][rule] = (if settings[tret][rule]? then Lib.merge(settings[tret][rule], value) else value)
 
     @init()  if not @inited
     @trets[tret].set opts  for tret, opts of settings
@@ -265,33 +260,7 @@ module.exports = class Mdash
 
 
   ###
-   * Получить содержимое <style></style> при использовании классов
-   * 
-   * @param bool $list false - вернуть в виде строки для style или как массив
-   * @param bool $compact не выводить пустые классы
-   * @return string|array
-  ###
-  getStyle: (list=false, compact=false) ->
-    res = {}
-    for tret in @getTretNames()
-      tretObj = @trets[tret]
-      arr = tretObj.classes
-      continue  if not Array.isArray arr
-
-      for classname, str of arr
-        continue  if compact and not str
-        clsname = (if @class_layout_prefix then @class_layout_prefix else "" ) + (if @tret_objects[tret].class_names[classname]? then @tret_objects[tret].class_names[classname] else classname)
-        res[clsname] = str
-
-    return res  if list
-    str = ""
-
-    for k, v of res
-      str += ".#{k} { #{v} }\n"
-    return str
-
-  ###
-   * Запустить типограф со стандартными параметрами
+   * Запустить типограф
    *
    * @param string $text
    * @param array $options
@@ -306,6 +275,9 @@ module.exports = class Mdash
 
   @getRuleNames: (mask) ->
     @::getRuleNames(mask)
+
+  @getStyles: (list=false) ->
+    Lib.styles(list)
 
   ###
    * Установить режим разметки,
@@ -326,5 +298,3 @@ module.exports = class Mdash
   @setLayoutClassPrefix: (prefix) ->
     Lib.LAYOUT_CLASS_PREFIX = prefix  if prefix?
 
-  @getStyles: () ->
-    Lib.getStyles()
