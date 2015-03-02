@@ -16,7 +16,7 @@ module.exports = class Quote extends Tret
         /(\<\%\%\%\_\_[^\>]+\>)\"(.+?)\"(\<\/\%\%\%\_\_[^\>]+\>)/g
       ]
       replacement: [
-        -> "&laquo;#{$1}#{$2}#{$3}&raquo;"
+        ($) -> "&laquo;#{$[1]}#{$[2]}#{$[3]}&raquo;"
       ]
 
     # Открывающая кавычка
@@ -25,7 +25,7 @@ module.exports = class Quote extends Tret
         /(^|\(|\s|\>|-)(\"|\&laquo\;)(\S+)/ig
       ]
       replacement: [
-        -> "#{$1}#{Lib.QUOTE_FIRS_OPEN}#{$3}"
+        ($) -> "#{$[1]}#{Lib.QUOTE_FIRS_OPEN}#{$[3]}"
       ]
     
     # Закрывающая кавычка
@@ -34,7 +34,7 @@ module.exports = class Quote extends Tret
         /([a-zа-яё0-9]|\.|\&hellip\;|\!|\?|\>|\)|\:)((\"|\&raquo\;)+)(\.|\&hellip\;|\&nbsp\;|\;|\:|\?|\!|\,|\s|\)|\<\/|$)/gi
       ]
       replacement: [
-        -> "#{$1}" + @str_repeat(Lib.QUOTE_FIRS_CLOSE, ($2.split("\"").length - 1) + ($2.split("&raquo;").length - 1)) + "#{$4}"
+        ($) -> $[1] + @str_repeat(Lib.QUOTE_FIRS_CLOSE, ($[2].split("\"").length - 1) + ($[2].split("&raquo;").length - 1)) + $[4]
       ]
 
     # Закрывающая кавычка особые случаи
@@ -47,11 +47,11 @@ module.exports = class Quote extends Tret
         /\>(\&laquo\;):($|\s|\<|\S)/gi
       ]
       replacement: [
-        -> "#{$1}" + @str_repeat(Lib.QUOTE_FIRS_CLOSE, ($2.split("\"").length - 1) + ($2.split("&laquo;").length - 1)) + "#{$4}#{$5}"
-        -> "#{$1}#{$2}" + @str_repeat(Lib.QUOTE_FIRS_CLOSE,($3.split("\"").length - 1) + ($3.split("&laquo;").length - 1)) + "#{$5}#{$6}"
-        -> ">&raquo;.#{$2}"
-        -> ">&raquo;,#{$2}"
-        -> ">&raquo;:#{$2}"
+        ($) -> $[1] + @str_repeat(Lib.QUOTE_FIRS_CLOSE, ($[2].split("\"").length - 1) + ($[2].split("&laquo;").length - 1)) + "#{$[4]}#{$[5]}"
+        ($) -> "#{$[1]}#{$[2]}" + @str_repeat(Lib.QUOTE_FIRS_CLOSE,($[3].split("\"").length - 1) + ($[3].split("&laquo;").length - 1)) + "#{$[5]}#{$[6]}"
+        ($) -> ">&raquo;.#{$[2]}"
+        ($) -> ">&raquo;,#{$[2]}"
+        ($) -> ">&raquo;:#{$[2]}"
       ]
 
     # Открывающая кавычка особые случаи
@@ -60,7 +60,7 @@ module.exports = class Quote extends Tret
         /(^|\(|\s|\>)(\"|\\\")(\s)(\S+)/gi
       ]
       replacement: [
-        -> "#{$1}#{Lib.QUOTE_FIRS_OPEN}#{$4}"
+        ($) -> "#{$[1]}#{Lib.QUOTE_FIRS_OPEN}#{$[4]}"
       ]
 
     # Внутренние кавычки-лапки и дюймы

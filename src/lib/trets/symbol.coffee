@@ -3,9 +3,6 @@ Lib = require '../lib'
 
 module.exports = class Symbol extends Tret
 
-  classes:
-    nowrap: 'white-space:nowrap;'
-
   rules:
 
     # Замена (tm) на символ торговой марки
@@ -14,7 +11,7 @@ module.exports = class Symbol extends Tret
         /([\s\t])?\(tm\)/ig
       ]
       replacement: [
-        -> "&trade;"
+        ($) -> "&trade;"
       ]
 
     # Замена (R) на символ зарегистрированной торговой марки
@@ -23,7 +20,7 @@ module.exports = class Symbol extends Tret
         /(.|^)\(r\)(.|$)/ig
       ]
       replacement: [
-        -> "#{$1}&reg;#{$2}"
+        ($) -> "#{$[1]}&reg;#{$[2]}"
       ]
 
     # Замена (c) на символ копирайт
@@ -33,8 +30,8 @@ module.exports = class Symbol extends Tret
         /\((c|с)\)($|\.|,|!|\?)/ig
       ]
       replacement: [
-        -> "&copy;&nbsp;"
-        -> "&copy;#{$2}"
+        ($) -> "&copy;&nbsp;"
+        ($) -> "&copy;#{$[2]}"
       ]
 
     # Расстановка правильного апострофа в текстах
@@ -43,9 +40,8 @@ module.exports = class Symbol extends Tret
         /(\s|^|\>|\&rsquo\;)([a-zа-яё]{1,})\'([a-zа-яё]+)/gi
       ]
       replacement: [
-        -> "#{$1}#{$2}&rsquo;#{$3}"
+        ($) -> "#{$[1]}#{$[2]}&rsquo;#{$[3]}"
       ]
-      cycled: true
 
     # Градусы по Фаренгейту
     degree_f:
@@ -53,7 +49,7 @@ module.exports = class Symbol extends Tret
         /([0-9]+)F($|\s|\.|\,|\;|\:|\&nbsp\;|\?|\!)/g
       ]
       replacement: [
-        -> Lib.tag("#{$1} &deg;F", "nobr") + $2
+        ($) -> Lib.tag("#{$[1]} &deg;F", "nobr") + $[2]
       ]
 
     # Символ евро
@@ -62,7 +58,7 @@ module.exports = class Symbol extends Tret
         '/€/g'
       ]
       replacement: [
-        -> "&euro;"
+        ($) -> "&euro;"
       ]
 
     # Замена стрелок вправо-влево на html коды
@@ -74,9 +70,9 @@ module.exports = class Symbol extends Tret
         /←/g
       ]
       replacement: [
-        -> "#{$1}&rarr;#{$2}"
-        -> "#{$1}&larr;#{$2}"
-        -> "&rarr;"
-        -> "&larr;"
+        ($) -> "#{$[1]}&rarr;#{$[2]}"
+        ($) -> "#{$[1]}&larr;#{$[2]}"
+        ($) -> "&rarr;"
+        ($) -> "&larr;"
       ]
 

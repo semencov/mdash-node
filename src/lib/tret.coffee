@@ -13,18 +13,11 @@ module.exports = class Tret
   apply: (text) ->
     self = @
 
-    console.log "\nTRET\t#{@constructor.name}...".yellow
-
     for id, rule of @rules
-      if rule.disabled
-        console.log "RULE\t#{id}...\tDisabled.".grey
-      else
-        console.log "RULE\t#{id}...".green
       continue  if rule.disabled
 
       if rule.function?
         result = rule.function.call self, text, rule
-        console.log "\t# Custom function"
 
         if typeof result isnt 'string'
           throw new Error("Custom function returned wrong result")
@@ -36,10 +29,7 @@ module.exports = class Tret
           replacement = if typeof rule.replacement is 'object' then (rule.replacement[k] or rule.replacement[0]) else rule.replacement
 
           result = text.replace pattern, if typeof replacement is 'string' then replacement else () ->
-            global["$#{i}"] = arguments[i]  for i in [0...arguments.length]
-
-            console.log "\t# Matched pattern ##{k}\t'"+ $0.dim.white + "' → '" + replacement.call(self).dim.white + "'"
-            replacement.call self
+            replacement.call self, arguments
 
           text = result  if typeof result is 'string'
     text

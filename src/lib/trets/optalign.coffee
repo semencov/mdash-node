@@ -24,8 +24,8 @@ module.exports = class OptAlign extends Tret
         /(\n|\r|^)(\&laquo\;)/ig
       ]
       replacement: [
-        -> $1 + Lib.tag($2, "span", {class: "oa-oqoute-sp-s"}) + Lib.tag($3, "span", {class: "oa-oqoute-sp-q"})
-        -> $1 + Lib.tag($2, "span", {class: "oa-oquote-nl"})
+        ($) -> $[1] + Lib.tag($[2], "span", {class: "oa-oqoute-sp-s"}) + Lib.tag($[3], "span", {class: "oa-oqoute-sp-q"})
+        ($) -> $[1] + Lib.tag($[2], "span", {class: "oa-oquote-nl"})
       ]
 
     # Оптическое выравнивание для пунктуации (скобка и запятая)
@@ -36,9 +36,9 @@ module.exports = class OptAlign extends Tret
         /([а-яёa-z0-9]+)\,(\s+)/g
       ]
       replacement: [
-        -> Lib.tag($1, "span", {class: "oa-obracket-sp-s"}) + Lib.tag("(", "span", {class: "oa-obracket-sp-b"})
-        -> $1 + Lib.tag("(", "span", {class: "oa-obracket-nl-b"})
-        -> $1 + Lib.tag(",", "span", {class: "oa-comma-b"}) + Lib.tag(" ", "span", {class: "oa-comma-e"})
+        ($) -> Lib.tag($[1], "span", {class: "oa-obracket-sp-s"}) + Lib.tag("(", "span", {class: "oa-obracket-sp-b"})
+        ($) -> $[1] + Lib.tag("(", "span", {class: "oa-obracket-nl-b"})
+        ($) -> $[1] + Lib.tag(",", "span", {class: "oa-comma-b"}) + Lib.tag(" ", "span", {class: "oa-comma-e"})
       ]
 
     # Оптическое выравнивание кавычки

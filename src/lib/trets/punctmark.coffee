@@ -12,7 +12,7 @@ module.exports = class Punctmark extends Tret
         /([a-zа-яё])(\s|&nbsp;)(но|а)(\s|&nbsp;)/ig
       ]
       replacement: [
-        -> "#{$1},#{$2}#{$3}#{$4}"
+        ($) -> "#{$[1]},#{$[2]}#{$[3]}#{$[4]}"
       ]
 
     # Лишние восклицательные, вопросительные знаки и точки
@@ -21,7 +21,7 @@ module.exports = class Punctmark extends Tret
         /([\!\.\?]){4,}/g
       ]
       replacement: [
-        -> "#{$1}#{$1}#{$1}"
+        ($) -> "#{$[1]}#{$[1]}#{$[1]}"
       ]
 
     # Лишние запятые, двоеточия, точки с запятой
@@ -30,7 +30,7 @@ module.exports = class Punctmark extends Tret
         /([\,]|[\:]|[\;]]){2,}/g
       ]
       replacement: [
-        -> "$1"
+        ($) -> "$[1]"
       ]
 
     # Замена трех точек на знак многоточия
@@ -39,7 +39,7 @@ module.exports = class Punctmark extends Tret
         /\.\.\./g
       ]
       replacement: [
-        -> "&hellip;"
+        ($) -> "&hellip;"
       ]
 
     # Замена восклицательного и вопросительного знаков местами
@@ -48,7 +48,7 @@ module.exports = class Punctmark extends Tret
         /([a-zа-яё0-9])\!\?(\s|$|\<)/gi
       ]
       replacement: [
-        -> "#{$1}?!#{$2}"
+        ($) -> "#{$[1]}?!#{$[2]}"
       ]
 
     # Замена сдвоенных знаков препинания на одинарные
@@ -59,9 +59,9 @@ module.exports = class Punctmark extends Tret
         /([a-zа-яё0-9])(\?)(\?)(\s|$|\<)/gi
       ]
       replacement: [
-        -> "#{$1}."
-        -> "#{$1}#{$2}#{$4}"
-        -> "#{$1}#{$2}#{$4}"
+        ($) -> "#{$[1]}."
+        ($) -> "#{$[1]}#{$[2]}#{$[4]}"
+        ($) -> "#{$[1]}#{$[2]}#{$[4]}"
       ]
 
     # Лишние пробелы после открывающей скобочки и перед закрывающей
@@ -71,8 +71,8 @@ module.exports = class Punctmark extends Tret
         /(\s|\t)+(\))/g
       ]
       replacement: [
-        -> "#{$1}"
-        -> "#{$2}"
+        ($) -> "#{$[1]}"
+        ($) -> "#{$[2]}"
       ]
 
     # Пробел перед открывающей скобочкой
@@ -81,7 +81,7 @@ module.exports = class Punctmark extends Tret
         /([a-zа-яё0-9])(\()/ig
       ]
       replacement: [
-        -> "#{$1} #{$2}"
+        ($) -> "#{$[1]} #{$[2]}"
       ]
 
     # Точка в конце текста, если её там нет
@@ -90,6 +90,6 @@ module.exports = class Punctmark extends Tret
         /([a-zа-яё0-9])(\s|\t|\&nbsp\;)*$/gi
       ]
       replacement: [
-        -> "#{$1}."
+        ($) -> "#{$[1]}."
       ]
       

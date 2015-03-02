@@ -13,7 +13,7 @@ module.exports = class Text extends Tret
         /(\s|^)(http|ftp|mailto|https)(:\/\/)([^\s\,\!\<]{4,})(\s|\.|\,|\!|\?|\<|$)/ig
       ]
       replacement: [
-        -> $1 + Lib.tag((if $4.substr(id.length-1) is "." then $4.substr(0, id.length-1) else $4), "a", {href: "#{$2}#{$3}" + (if $4.substr(id.length-1) is "." then $4.substr(0, id.length-1) else $4)}) + (if $4.substr(id.length-1) then "." else "") + $5
+        ($) -> $[1] + Lib.tag((if $[4].substr(id.length-1) is "." then $[4].substr(0, id.length-1) else $[4]), "a", {href: "#{$[2]}#{$[3]}" + (if $[4].substr(id.length-1) is "." then $[4].substr(0, id.length-1) else $[4])}) + (if $[4].substr(id.length-1) then "." else "") + $[5]
       ]
 
     # Выделение эл. почты из текста
@@ -22,7 +22,7 @@ module.exports = class Text extends Tret
         /(\s|^|\&nbsp\;|\()([a-z0-9\-\_\.]{2,})\@([a-z0-9\-\.]{2,})\.([a-z]{2,6})(\)|\s|\.|\,|\!|\?|$|\<)/g
       ]
       replacement: [
-        -> $1 + Lib.tag("#{$2}@#{$3}.#{$4}", "a", {href: "mailto:#{$2}@#{$3}.#{$4}"}) + $5
+        ($) -> $[1] + Lib.tag("#{$[2]}@#{$[3]}.#{$[4]}", "a", {href: "mailto:#{$[2]}@#{$[3]}.#{$[4]}"}) + $[5]
       ]
 
     # Удаление повторяющихся слов
@@ -32,8 +32,8 @@ module.exports = class Text extends Tret
         /(\s|\&nbsp\;|^|\.|\!|\?)(([А-ЯЁ])([а-яё]{2,}))( |\t|\&nbsp\;)(([а-яё])\4)/g
       ]
       replacement: [
-        -> "#{$1}"
-        -> $1 + (if $7 is "#{$3}".toLowerCase() then $2 else "#{$2}#{$5}#{$6}")
+        ($) -> "#{$[1]}"
+        ($) -> $[1] + (if $[7] is "#{$[3]}".toLowerCase() then $[2] else "#{$[2]}#{$[5]}#{$[6]}")
       ]
 
     # Простановка параграфов

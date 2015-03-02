@@ -5,9 +5,6 @@ module.exports = class Etc extends Tret
 
   order: 12
   
-  classes:
-    nowrap: 'white-space:nowrap;'
-
   rules:
 
     # Акцент
@@ -16,7 +13,7 @@ module.exports = class Etc extends Tret
         /(у|е|ы|а|о|э|я|и|ю|ё)\`(\w)/gi
       ]
       replacement: [
-        -> "#{$1}&#769;#{$2}"
+        ($) -> "#{$[1]}&#769;#{$[2]}"
       ]
 
     # Надстрочный текст после символа ^
@@ -25,7 +22,7 @@ module.exports = class Etc extends Tret
         /((\s|\&nbsp\;|^)+)\^([a-zа-яё0-9\.\:\,\-]+)(\s|\&nbsp\;|$|\.$)/ig
       ]
       replacement: [
-        -> Lib.tag(Lib.tag($3, "small"), "sup") + $4
+        ($) -> Lib.tag(Lib.tag($[3], "small"), "sup") + $[4]
       ]
 
     # Тире между диапозоном веков
@@ -34,7 +31,7 @@ module.exports = class Etc extends Tret
         /(\s|\t|\&nbsp\;|^)([XIV]{1,5})(-|\&mdash\;)([XIV]{1,5})(( |\&nbsp\;)?(в\.в\.|вв\.|вв|в\.|в))/g
       ]
       replacement: [
-        -> $1 + Lib.tag("#{$2}&mdash;#{$4} вв.", "nobr")
+        ($) -> $[1] + Lib.tag("#{$[2]}&mdash;#{$[4]} вв.", "nobr")
       ]
 
     # Тире и отмена переноса между диапозоном времени
@@ -43,7 +40,7 @@ module.exports = class Etc extends Tret
         /([^\d\>]|^)([\d]{1,2}\:[\d]{2})(-|\&mdash\;|\&minus\;)([\d]{1,2}\:[\d]{2})([^\d\<]|$)/ig
       ]
       replacement: [
-        -> $1 + Lib.tag("#{$2}&mdash;#{$4}", "nobr") + $5
+        ($) -> $[1] + Lib.tag("#{$[2]}&mdash;#{$[4]}", "nobr") + $[5]
       ]
 
     # Удаление nbsp в nobr/nowrap тэгах

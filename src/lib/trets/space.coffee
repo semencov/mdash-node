@@ -15,7 +15,7 @@ module.exports = class Space extends Tret
         /([a-zA-Zа-яёА-ЯЁ])(\s|\t)+([A-ZА-ЯЁ]{2})([\s\;\.\?\!\:\(\"]|\&(ra|ld)quo\;|$)/g
       ]
       replacement: [
-        -> "#{$1}&nbsp;#{$3}#{$4}"
+        ($) -> "#{$[1]}&nbsp;#{$[3]}#{$[4]}"
       ]
 
     # Удаление пробела перед точкой, запятой, двоеточием, точкой с запятой
@@ -24,7 +24,7 @@ module.exports = class Space extends Tret
         /((\s|\t|\&nbsp\;)+)([\,\:\.\;\?])(\s+|$)/g
       ]
       replacement: [
-        -> "#{$3}#{$4}"
+        ($) -> "#{$[3]}#{$[4]}"
       ]
 
     # Пробел после запятой
@@ -34,8 +34,8 @@ module.exports = class Space extends Tret
         /([^0-9])\,([а-яёa-z0-9])/ig
       ]
       replacement: [
-        -> ", #{$2}"
-        -> "#{$1}, #{$2}"
+        ($) -> ", #{$[2]}"
+        ($) -> "#{$[1]}, #{$[2]}"
       ]
 
     # Пробел после знаков пунктуации, кроме точки
@@ -44,7 +44,7 @@ module.exports = class Space extends Tret
         /(\s|\t|\&nbsp\;|^|\n)([a-zа-яё0-9]+)(\s|\t|\&nbsp\;)?(\:|\)|\,|\&hellip\;|(?:\!|\?)+)([а-яёa-z])/ig
       ]
       replacement: [
-        -> "#{$1}#{$2}#{$4} #{$5}"
+        ($) -> "#{$[1]}#{$[2]}#{$[4]} #{$[5]}"
       ]
 
     # Пробел после точки
@@ -54,8 +54,8 @@ module.exports = class Space extends Tret
         /(\s|\t|\&nbsp\;|^)([a-zа-яё0-9]+)\.([а-яёa-z]{1,4})($|[^a-zа-яё])/ig
       ]
       replacement: [
-        -> "#{$1}#{$2}." + (if $5 is "." then "" else " ") + "#{$4}#{$5}"
-        -> "#{$1}#{$2}." + (if $3.toLowerCase() in @domain_zones or /[a-z]{1,12}/.test($3.toLowerCase()) then "" else if $4 in [".",",",";","!"] then "" else " ") + "#{$3}#{$4}"
+        ($) -> "#{$[1]}#{$[2]}." + (if $[5] is "." then "" else " ") + "#{$[4]}#{$[5]}"
+        ($) -> "#{$[1]}#{$[2]}." + (if $[3].toLowerCase() in @domain_zones or /[a-z]{1,12}/.test($[3].toLowerCase()) then "" else if $[4] in [".",",",";","!"] then "" else " ") + "#{$[3]}#{$[4]}"
       ]
 
     # Пробел после знаков троеточий с вопросительным или восклицательными знаками
@@ -64,7 +64,7 @@ module.exports = class Space extends Tret
         /([\?\!]\.\.)([а-яёa-z])/ig
       ]
       replacement: [
-        -> "#{$1} #{$2}"
+        ($) -> "#{$[1]} #{$[2]}"
       ]
 
     # Удаление лишних пробельных символов и табуляций
@@ -73,7 +73,7 @@ module.exports = class Space extends Tret
         /(\s|\t)+/g
       ]
       replacement: [
-        -> ' '
+        ($) -> ' '
       ]
 
     # Удаление пробела перед символом процента
@@ -82,7 +82,7 @@ module.exports = class Space extends Tret
         /(\d+)([\t\s]+)\%/g
       ]
       replacement: [
-        -> "#{$1}%"
+        ($) -> "#{$[1]}%"
       ]
 
     # Неразрывный пробел перед открывающей скобкой
@@ -91,7 +91,7 @@ module.exports = class Space extends Tret
         /(^|\s|\t|>)([a-zа-яё]{1,2})\s(\&laquo\;|\&bdquo\;)/g
       ]
       replacement: [
-        -> "#{$1}#{$2}&nbsp;#{$3}"
+        ($) -> "#{$[1]}#{$[2]}&nbsp;#{$[3]}"
       ]
 
     # Неразрывный пробел в датах перед числом и месяцем
@@ -100,7 +100,7 @@ module.exports = class Space extends Tret
         /(\d)(\s)+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)([^\<]|$)/ig
       ]
       replacement: [
-        -> "#{$1}&nbsp;#{$3}#{$4}"
+        ($) -> "#{$[1]}&nbsp;#{$[3]}#{$[4]}"
       ]
 
     # Удаление пробелов в конце текста
@@ -109,7 +109,7 @@ module.exports = class Space extends Tret
         /\s+$/
       ]
       replacement: [
-        -> ''
+        ($) -> ''
       ]
 
     # Отсутстввие пробела после троеточия после открывающей кавычки
@@ -118,7 +118,7 @@ module.exports = class Space extends Tret
         /(\&laquo\;|\&bdquo\;)( |\&nbsp\;)?\&hellip\;( |\&nbsp\;)?([a-zа-яё])/ig
       ]
       replacement: [
-        -> "#{$1}&hellip;#{$4}"
+        ($) -> "#{$[1]}&hellip;#{$[4]}"
       ]
 
     # Пробел после года
@@ -127,6 +127,6 @@ module.exports = class Space extends Tret
         /(^|\s|\&nbsp\;)([0-9]{3,4})(год([ауе]|ом)?)([^a-zа-яё]|$)/ig
       ]
       replacement: [
-        -> "#{$1}#{$2} #{$3}#{$5}"
+        ($) -> "#{$[1]}#{$[2]} #{$[3]}#{$[5]}"
       ]
 

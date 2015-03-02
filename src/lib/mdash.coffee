@@ -168,7 +168,7 @@ module.exports = class Mdash
     for selector, value of options
       if value['disabled']?
         for k, v of @settings
-          if new RegExp("^#{selector}\.", 'i').test(k) and v['disabled']?
+          if selector isnt "*" and new RegExp("^#{selector}\.", 'i').test(k) and v['disabled']?
             if Object.keys(v).length is 1
               delete @settings[k]
             else
@@ -245,6 +245,10 @@ module.exports = class Mdash
    *
   ###
   format: (text, options, callback) ->
+    if typeof text is 'object'
+      options = text
+      text = null
+
     @setText(text)   if text?
     @setup(options)  if options? and typeof options is 'object'
     

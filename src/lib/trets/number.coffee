@@ -13,7 +13,7 @@ module.exports = class Number extends Tret
         /(\d+)\-(\d)/gi
       ]
       replacement: [
-        -> "#{$1}&minus;#{$2}"
+        ($) -> "#{$[1]}&minus;#{$[2]}"
       ]
 
     # Расстановка знака минус между диапозоном чисел
@@ -22,7 +22,7 @@ module.exports = class Number extends Tret
         /(^|\s|\&nbsp\;)(\&minus\;|\-)(\d+)(\.\.\.|\&hellip\;)(\s|\&nbsp\;)?(\+|\-|\&minus\;)?(\d+)/ig
       ]
       replacement: [
-        -> "#{$1}&minus;#{$3}#{$4}#{$5}" + (if $6 is "+" then $6 else "&minus;") + $7
+        ($) -> "#{$[1]}&minus;#{$[3]}#{$[4]}#{$[5]}" + (if $[6] is "+" then $[6] else "&minus;") + $[7]
       ]
 
     # Замена x на символ × в размерных единицах
@@ -31,7 +31,7 @@ module.exports = class Number extends Tret
         /([^a-zA-Z><]|^)(\&times\;)?(\d+)(\s*)(x|х)(\s*)(\d+)([^a-zA-Z><]|$)/g
       ]
       replacement: [
-        -> "#{$1}#{$2}#{$3}&times;#{$7}#{$8}"
+        ($) -> "#{$[1]}#{$[2]}#{$[3]}&times;#{$[7]}#{$[8]}"
       ]
 
     # Нижний индекс
@@ -40,7 +40,7 @@ module.exports = class Number extends Tret
         /([a-zа-яё0-9])\_([\d]{1,3})([^а-яёa-z0-9]|$)/ig
       ]
       replacement: [
-        -> $1 + Lib.tag(Lib.tag($2, "small"), "sub") + $3
+        ($) -> $[1] + Lib.tag(Lib.tag($[2], "small"), "sub") + $[3]
       ]
 
     # Верхний индекс
@@ -49,7 +49,7 @@ module.exports = class Number extends Tret
         /([a-zа-яё0-9])\^([\d]{1,3})([^а-яёa-z0-9]|$)/ig
       ]
       replacement: [
-        -> $1 + Lib.tag(Lib.tag($2, "small"), "sup") + $3
+        ($) -> $[1] + Lib.tag(Lib.tag($[2], "small"), "sup") + $[3]
       ]
 
     # Замена дробей 1/2, 1/4, 3/4 на соответствующие символы
@@ -59,8 +59,8 @@ module.exports = class Number extends Tret
         /(^|\D)3\/4(\D)/g
       ]
       replacement:[
-        -> "#{$1}&frac1#{$2};#{$3}"
-        -> "#{$1}&frac34;#{$2}"
+        ($) -> "#{$[1]}&frac1#{$[2]};#{$[3]}"
+        ($) -> "#{$[1]}&frac34;#{$[2]}"
       ]
 
     # Математические знаки больше/меньше/плюс минус/неравно
@@ -73,11 +73,11 @@ module.exports = class Number extends Tret
         /\+-/g
       ]
       replacement:[
-        -> "&ne;"
-        -> "&le;"
-        -> "#{$1}&ge;"
-        -> "&cong;"
-        -> "&plusmn;"
+        ($) -> "&ne;"
+        ($) -> "&le;"
+        ($) -> "#{$[1]}&ge;"
+        ($) -> "&cong;"
+        ($) -> "&plusmn;"
       ]
 
     # Объединение триад чисел полупробелом
@@ -86,7 +86,7 @@ module.exports = class Number extends Tret
         /([0-9]{1,3}( [0-9]{3}){1,})(.|$)/g
       ]
       replacement: [
-        -> (if $3 is "-" then $0 else $1.replace(" ", "&thinsp;")) + $3
+        ($) -> (if $[3] is "-" then $[0] else $[1].replace(" ", "&thinsp;")) + $[3]
       ]
 
     # Пробел между симоволом номера и числом
@@ -95,7 +95,7 @@ module.exports = class Number extends Tret
         /(№|\&#8470\;)(\s|&nbsp;)*(\d)/ig
       ]
       replacement: [
-        -> "&#8470;&thinsp;#{$3}"
+        ($) -> "&#8470;&thinsp;#{$[3]}"
       ]
 
     # Пробел между параграфом и числом
@@ -104,6 +104,6 @@ module.exports = class Number extends Tret
         /(§|\&sect\;)(\s|&nbsp;)*(\d+|[IVX]+|[a-zа-яё]+)/gi
       ]
       replacement: [
-        -> "&sect;&thinsp;#{$3}"
+        ($) -> "&sect;&thinsp;#{$[3]}"
       ]
 
