@@ -49,7 +49,7 @@ var trets = typo.getTretNames();
 //   'Etc' ]
 ```
 
-Get rules for all tret or specific one with it's enabled/disabled status (if `false` the rule won't be applied):
+Get rules for all tret or specific one:
 
 ```javascript
 var typo = new Mdash();
@@ -91,7 +91,7 @@ var settings = typo.getSettings();
 By default some rules (eg. rules for Optical Alignment) put additional HTML tags in your text with inline styles. If you would like to put styles in separate classes, use this:
 
 ```javascript
-Mdash.setLayout(Mdash.LAYOUT_STYLE);
+Mdash.setLayout(Mdash.LAYOUT_CLASS);
 ```
 
 Or you can set styles to go both inline and in class:

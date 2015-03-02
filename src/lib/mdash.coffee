@@ -19,8 +19,6 @@ fs = require 'fs'
 
 Lib = require './lib'
 
-colors = require('colors')
-
 settingsFile = path.join process.cwd(), ".mdash"
 tretsDir = path.join __dirname, './trets'
 
@@ -144,11 +142,6 @@ module.exports = class Mdash
     for tret in tretNames
       ruleNames = @trets[tret].getRuleNames()
       result[tret] = ruleNames
-      # Object.keys(@trets[tret]::rules or {})
-      #   .map (name) ->
-      #     rule = @trets[tret]::rules[name]
-      #     result[tret][name] = (rule.disabled isnt true or rule.enabled is true)
-      #     return
 
     if mask then Lib.selectRules(mask, result) else result
 
