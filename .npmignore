@@ -2,18 +2,17 @@
 
 .travis*
 History.md
-Gruntfile..coffee
+Gruntfile.coffee
 Gruntfile.js
 
 src/
-/out/bin/
-/out/docs/
-/out/test/
+bin/
+docs/
+test/
 
 .git/
 .gitignore
+.coffeelintrc
 .jshintrc
 .idea/
-
-app.js
 .mdash

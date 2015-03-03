@@ -1,5 +1,5 @@
 /.idea/
-/src/test/
-/out/test/
+/lib/
+/test/
 /node_modules/
 npm-debug.log
