@@ -1,6 +1,6 @@
 {
   "name": "mdash-node",
-  "version": "0.2.13",
+  "version": "1.0.0",
   "main": "./lib/mdash",
   "description": "Evgeny Muravjev Typograph for Node.js",
   "keywords": [
@@ -8,8 +8,11 @@
     "mdash.ru",
     "typography",
     "typograf",
-    "typographer"
+    "typographer",
+    "EMT",
+    "emt"
   ],
+  "license": "MIT",
   "homepage": "https://github.com/semencov/mdash-node",
   "bugs": "https://github.com/semencov/mdash-node/issues",
   "author": {
@@ -21,11 +24,6 @@
     "type": "git",
     "url": "https://github.com/semencov/mdash-node.git"
   },
-  "licenses": [
-    {
-      "type": "Public Domain"
-    }
-  ],
   "devDependencies": {
     "grunt-contrib-watch": "~0.5.3",
     "grunt-contrib-coffee": "~0.9.0",
@@ -38,11 +36,5 @@
     "grunt": "~0.4.2"
   },
   "dependencies": {
-    "underscore": "^1.7.0"
-  },
-  "badges": {
-    "travis": true,
-    "npm": true,
-    "npmdownloads": true
   }
 }
