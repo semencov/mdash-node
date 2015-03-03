@@ -11,42 +11,37 @@ module.exports = (grunt) ->
   # Project configuration.
   grunt.initConfig
     pkg: grunt.file.readJSON('package.json')
+
     coffeelint:
       gruntfile:
         src: '<%= watch.gruntfile.files %>'
       lib:
         src: '<%= watch.lib.files %>'
+      test:
+        src: '<%= watch.test.files %>'
       options: grunt.file.readJSON('.coffeelintrc')
+
     coffee:
       options:
-        bare: true
         expand: true
-      lib:
-        cwd: 'src/'
-        files:
-          'lib/mdash.js': [
-            'src/lib/mdash.coffee'
-            'src/lib/mdash.lib.coffee'
-            'src/lib/mdash.tret.coffee'
-            'src/lib/mdash.tret.*.coffee'
-          ]
       alt:
-        cwd: 'src/'
-        files:
-          'lib/mdash_alt.js': [
-            'src/alt/mdash.coffee'
-            'src/alt/mdash.lib.coffee'
-            'src/alt/mdash.tret.coffee'
-            'src/alt/mdash.tret.*.coffee'
-            'src/alt/mdash.rule.coffee'
-          ]
-
+        expand: true
+        cwd: 'src/lib/'
+        src: ['**/*.coffee']
+        dest: 'lib/'
+        ext: '.js'
+      test:
+        expand: true
+        cwd: 'src/test/'
+        src: ['**/*.coffee']
+        dest: 'test/'
+        ext: '.js'
 
     simplemocha:
       all:
         src: [
           'node_modules/should/should.js'
-          'out/test/**/*.js'
+          'test/**/*.js'
         ]
         options:
           globals: ['should']
@@ -78,8 +73,11 @@ module.exports = (grunt) ->
       lib:
         files: ['src/lib/**/*.coffee']
         tasks: ['coffeelint:lib', 'coffee:lib']
+      test:
+        files: ['src/test/**/*.coffee']
+        tasks: ['coffeelint:test', 'coffee:test', 'simplemocha']
 
-    clean: ['out/']
+    clean: ['lib/']
 
   # grunt.event.on 'watch', (action, files, target) ->
   #   grunt.log.writeln "#{target}: #{files} has #{action}"
@@ -107,6 +105,6 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'default', [
     'compile'
-    'test'
+    # 'test'
   ]
 
