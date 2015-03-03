@@ -29,7 +29,7 @@ module.exports = class Dash extends Tret
     # Тире после переноса строки
     mdash_2:
       pattern: [
-        /(\n|\r|^|\>)(\-|\&mdash\;)(\s)/gm
+        /(\n|\r|^|\>)(\-|\&mdash\;)(\s)/g
       ]
       replacement: [
         ($) -> "#{$[1]}&mdash;&nbsp;"
@@ -76,9 +76,7 @@ module.exports = class Dash extends Tret
     # Расстановка дефисов с частицами ка, де, кась
     ka_de_kas:
       pattern: [
-        /(\B)([а-яё]+)(\s|\&nbsp\;)(ка)(\B)/gi
-        /(\B)([а-яё]+)(\s|\&nbsp\;)(де)(\B)/gi
-        /(\B)([а-яё]+)(\s|\&nbsp\;)(кась)(\B)/gi
+        /(\B)([а-яё]+)(\s|\&nbsp\;)(кась|ка|de)(\B)/ig
       ]
       replacement: [
         ($) -> (if $[1] is "&nbsp;" then " " else $[1]) + "#{$[2]}-#{$[4]}" + (if $[5] is "&nbsp;" then " " else $[5])

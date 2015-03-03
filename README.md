@@ -1,6 +1,6 @@
 # mdash
 
-This is Node.js port of the original Russian Typograph ([mdash.ru](http://mdash.ru/)) by Evgeny Muravjev & Alexander Drutsa
+This is Node.js port of the original Russian Typograph ([mdash.ru](http://mdash.ru/)) by Evgeny Muravjev
 
 ## Getting Started
 Install the module with:
@@ -9,24 +9,43 @@ npm install mdash-node
 ```
 
 ## Documentation
+
 Currently this is a port from PHP library which fully immitates its behavior excluding debuging and custom builds. So you can check the original documentation on [mdash.ru](http://mdash.ru/). Optimizations and improvements will follow. All formatting rules can be found on [mdash.ru/rules.html](http://mdash.ru/rules.html) (Russian).
 
 ### Usage
+
 The module can accept rules settings either with new instance or as args to the format method.
 
 ```javascript
 var Mdash = require('mdash-node');
 
-var a = new Mdash("Типографика - это круто!");
-console.log(a.format());  // <p>Типографика&nbsp;&mdash; это круто!</p>
+var tp = new Mdash("Типографика - это круто!");
+var txt = tp.format();  // Типографика&nbsp;&mdash; это круто!
+```
 
-var b = new Mdash("Типографика - это круто!", {'Text.paragraphs': false});
-console.log(b.format());  // Типографика&nbsp;&mdash; это круто!
+Rule settings can be suplied to instance.
 
-var c = new Mdash({'Text.paragraphs': false});
-console.log(c.format("Типографика - это круто!"));  // Типографика&nbsp;&mdash; это круто!
+```javascript
+var tp = new Mdash("Типографика - это круто!", {'Text.paragraphs': true});
+var txt = tp.format();  // <p>Типографика&nbsp;&mdash; это круто!</p>
 
-console.log(Mdash.format("Типографика - это круто!", {'Text.paragraphs': false}));  // Типографика&nbsp;&mdash; это круто!
+txt = tp.format("Типографика - это круто!", {
+  'Text.paragraphs': false
+});  // Типографика&nbsp;&mdash; это круто!
+```
+
+You can also suplie a callback to the method `format`:
+
+```javascript
+var tp = new Mdash();
+
+txt = tp.format("Типографика - это круто!", {'Text.paragraphs': true}, function(err, text) {
+  console.log(text);  // <p>Типографика&nbsp;&mdash; это круто!</p>
+});
+
+txt = tp.format("Типографика - это круто!", function(err, text) {
+  console.log(text);  // Типографика&nbsp;&mdash; это круто!
+});
 ```
 
 Also you can get the list of trets and rules:
@@ -234,4 +253,5 @@ This settings will override the default, but will be overriden by options you'll
 
 
 ## License
+
 This package is licensed under the MIT license.

@@ -34,6 +34,15 @@ module.exports = class Date extends Tret
         ($) -> $[1] + Lib.tag("#{$[2]}&mdash;#{$[4]} #{$[6]}", "nobr") + $[7]
       ]
     
+    # Тире между диапозоном веков
+    century_period:
+      pattern: [
+        /(\s|\&nbsp\;|^)([XIV]{1,5})(-|\&mdash\;)([XIV]{1,5})(( |\&nbsp\;)?(в\.в\.|вв\.|вв|в\.|в))/g
+      ]
+      replacement: [
+        ($) -> $[1] + Lib.tag("#{$[2]}&mdash;#{$[4]} вв.", "nobr")
+      ]
+
     # Привязка года к дате
     nobr_year_in_date:
       pattern: [

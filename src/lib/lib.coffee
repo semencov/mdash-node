@@ -382,6 +382,7 @@ exports.omit = (object, keys) ->
 
   result
 
+# TODO: is it needed at all?
 exports.preg_quote = (str, delimiter) ->
   String str
     .replace new RegExp('[.\\\\+*?\\[\\^\\]$(){}!|:\\' + (delimiter || '') + '-]', 'g'), '\\$&'
@@ -469,7 +470,7 @@ exports.removeHtmlTags = (text, allowableTag=null) ->
  * @param   bool $safe
  * @return  string
 ###
-exports.processTags = (text, processor=((txt)->txt)) ->
+exports.processTags = (text="", processor=((txt)->txt)) ->
   text.replace /(\<\/?)(.+?)(\>)/gi, ($0, $1, $2, $3) ->
     $2 = "#{$2}".trim()
     
@@ -498,7 +499,7 @@ exports.addSafeBlock = (id, tag) ->
 
   {id: id, pattern: pattern}
 
-exports.processSafeBlocks = (text, blocks=[], processor=((txt)->txt), reverse=false) ->
+exports.processSafeBlocks = (text="", blocks=[], processor=((txt)->txt), reverse=false) ->
   for block in (if reverse then blocks.reverse() else blocks)
     text = text.replace block.pattern, ($0, $1, $2, $3) ->
       $1 + processor($2) + $3
@@ -599,7 +600,7 @@ exports.processSettings = (options={}, defaults={}) ->
  * @param   string $text
  * @return  string
 ###
-exports.decodeInternalBlocks = (text) ->
+exports.decodeInternalBlocks = (text="") ->
   text.replace new RegExp("#{INTERNAL_BLOCK_OPEN}([a-zA-Z0-9\/=]+?)#{INTERNAL_BLOCK_CLOSE}", 'g'), ($0, $1) -> exports.decode($1)
   
 ###
@@ -620,7 +621,7 @@ exports.iblock = (text="") ->
  * @param   array $attribute список атрибутов, где ключ - имя атрибута, а значение - само значение данного атрибута
  * @return  string
 ###
-exports.tag = (content, tag='span', attribute={}) ->
+exports.tag = (content="", tag='span', attribute={}) ->
   # style = attribute.style or ""
   
   if attribute.class? and attribute.class is "nowrap"
@@ -678,7 +679,7 @@ exports.styles = (list=false) ->
  *
  * @param string $text
 ###
-exports.convertEntitiesToUnicode = (text) ->
+exports.convertEntitiesToUnicode = (text="") ->
   text = text.replace /\&#([0-9]+)\;/g, (match, m) ->
     String.fromCharCode(parseInt(m))
   text = text.replace /\&#x([0-9A-F]+)\;/g, (match, m) ->

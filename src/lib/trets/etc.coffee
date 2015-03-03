@@ -10,7 +10,7 @@ module.exports = class Etc extends Tret
     # Акцент
     acute_accent:
       pattern: [
-        /(у|е|ы|а|о|э|я|и|ю|ё)\`(\w)/gi
+        /(у|е|ы|а|о|э|я|и|ю|ё)\`([а-яё]+)/gi
       ]
       replacement: [
         ($) -> "#{$[1]}&#769;#{$[2]}"
@@ -19,19 +19,10 @@ module.exports = class Etc extends Tret
     # Надстрочный текст после символа ^
     word_sup:
       pattern: [
-        /((\s|\&nbsp\;|^)+)\^([a-zа-яё0-9\.\:\,\-]+)(\s|\&nbsp\;|$|\.$)/ig
+        /((\s|\&nbsp\;|^)+)\^([a-zа-яё0-9\.\:\,\-\*]+)(\s|\&nbsp\;|$|\.$)/ig
       ]
       replacement: [
         ($) -> Lib.tag(Lib.tag($[3], "small"), "sup") + $[4]
-      ]
-
-    # Тире между диапозоном веков
-    century_period:
-      pattern: [
-        /(\s|\t|\&nbsp\;|^)([XIV]{1,5})(-|\&mdash\;)([XIV]{1,5})(( |\&nbsp\;)?(в\.в\.|вв\.|вв|в\.|в))/g
-      ]
-      replacement: [
-        ($) -> $[1] + Lib.tag("#{$[2]}&mdash;#{$[4]} вв.", "nobr")
       ]
 
     # Тире и отмена переноса между диапозоном времени
@@ -45,7 +36,7 @@ module.exports = class Etc extends Tret
 
     # Удаление nbsp в nobr/nowrap тэгах
     expand_no_nbsp_in_nobr:
-      function: (text, rule) ->
+      function: (text, opts) ->
         thetag = Lib.tag("###", 'nobr')
         arr = thetag.split("###")
         b = Lib.preg_quote(arr[0], '/')

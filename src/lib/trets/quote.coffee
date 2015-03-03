@@ -65,7 +65,7 @@ module.exports = class Quote extends Tret
 
     # Внутренние кавычки-лапки и дюймы
     quotation:
-      function: (text, rule) ->
+      function: (text, opts) ->
         okposstack = [0]
         okpos = 0
         level = 0
@@ -76,12 +76,12 @@ module.exports = class Quote extends Tret
           break  if p is false
 
           if p.str is "&laquo;"
-            text = @inject_in text, p.pos, Lib.QUOTE_CRAWSE_OPEN  if level > 0 and not rule.no_bdquotes
+            text = @inject_in text, p.pos, Lib.QUOTE_CRAWSE_OPEN  if level > 0 and not opts.no_bdquotes
             level++
 
           if p.str is "&raquo;"
             level--
-            text = @inject_in text, p.pos, Lib.QUOTE_CRAWSE_CLOSE  if level > 0 and not rule.no_bdquotes
+            text = @inject_in text, p.pos, Lib.QUOTE_CRAWSE_CLOSE  if level > 0 and not opts.no_bdquotes
 
           offset = p.pos + "#{p.str}".length
 
@@ -90,7 +90,7 @@ module.exports = class Quote extends Tret
             okposstack.push okpos
           else
             if level < 0
-              if not rule.no_inches
+              if not opts.no_inches
                 amount = 0
                 while amount is 0 and okposstack.length
                   lokpos = okposstack.pop()

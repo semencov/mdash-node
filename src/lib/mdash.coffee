@@ -8,12 +8,6 @@ Licensed under the MIT license.
 
 'use strict'
 
-process.on 'uncaughtException', (error) ->
-  console.log "=[uncaughtException]====================================================="
-  console.error error
-  console.log error.stack
-  console.log "========================================================================="
-
 path = require 'path'
 fs = require 'fs'
 
@@ -21,11 +15,6 @@ Lib = require './lib'
 
 settingsFile = path.join process.cwd(), ".mdash"
 tretsDir = path.join __dirname, './trets'
-
-debug = (obj, place, after_text, after_text_raw="") ->
-  console.info("DEBUG\t #{obj.constructor.name}\t\t\t", place)
-  return
-
 
 readFile = (filepath) ->
   contents = undefined
@@ -103,14 +92,14 @@ module.exports = class Mdash
             self.trets[name] = new tret()
             self.tretsOrder.push name
       catch e
-          
+
     @tretsOrder.sort (a, b) ->
       self.trets[a].order - self.trets[b].order
 
     @settings = {}
     @blocks = []
 
-    @setup options
+    @setup options  if options? and typeof options is 'object'
     return
 
   
@@ -119,7 +108,7 @@ module.exports = class Mdash
    *
    * @param string $text
   ###
-  setText: (text="") ->
+  setText: (text) ->
     @text = text
   
   ###
@@ -148,28 +137,7 @@ module.exports = class Mdash
   getSettings: () ->
     @settings
 
-
-  ###
-   * Установить настройки
-   *
-   * @param array $setupmap
-  ###
-  setup: (options={}) ->
-    @settings = Lib.processSettings(@presets)
-    options = Lib.processSettings(options, @presets)
-
-    for selector, value of options
-      if value['disabled']?
-        for k, v of @settings
-          if selector isnt "*" and new RegExp("^#{selector}\.", 'i').test(k) and v['disabled']?
-            if Object.keys(v).length is 1
-              delete @settings[k]
-            else
-              @settings[k]['disabled'] = value['disabled']
-
-      value = Lib.merge(@settings[selector] or {}, value) or {}
-      @settings[selector] = value   if Object.keys(value).length > 0
-
+  getRuleSettings: () ->
     settings = {}
 
     ruleNames = @getRuleNames()
@@ -181,10 +149,33 @@ module.exports = class Mdash
         settings[tret] = {}  if not settings[tret]?
         for rule in rules
           settings[tret][rule] = (if settings[tret][rule]? then Lib.merge(settings[tret][rule], value) else value)
+    settings
+
+
+
+  ###
+   * Установить настройки
+   *
+   * @param array $setupmap
+  ###
+  setup: (options={}) ->
+    @settings = Lib.merge Lib.processSettings(@presets), @settings
+    options = Lib.processSettings(options, @presets)
+
+
+    for selector, value of options
+      if value['disabled']?
+        for k, v of @settings
+          if selector isnt "*" and new RegExp("^#{selector}\.?", 'i').test(k) and v['disabled']?
+            if Object.keys(v).length is 1
+              delete @settings[k]
+            else
+              @settings[k]['disabled'] = value['disabled']
+
+      value = Lib.merge(@settings[selector] or {}, value) or {}
+      @settings[selector] = value   if Object.keys(value).length > 0
 
     @init()  if not @inited
-    @trets[tret].set opts  for tret, opts of settings
-      
     return
 
 
@@ -209,6 +200,8 @@ module.exports = class Mdash
    * - normilize special chars and entities
   ###
   beforeFormat: (text) ->
+    throw new Error("Text is undefined")  if not text?
+
     text = Lib.processSafeBlocks text, @blocks, Lib.encode
     text = Lib.processTags text, Lib.encode
     text = Lib.clearSpecialChars text
@@ -220,6 +213,8 @@ module.exports = class Mdash
    * - decript content in safe tags
   ###
   afterFormat: (text) ->
+    throw new Error("Text is undefined after format")  if not text?
+
     text = Lib.decodeInternalBlocks text
     text = Lib.convertEntitiesToUnicode text  if @isOn('dounicode')
     text = Lib.processTags text, Lib.decode
@@ -237,43 +232,38 @@ module.exports = class Mdash
    * Запустить типограф на выполнение
    *
   ###
-  format: (text, options, callback) ->
-    if typeof text is 'object'
-      options = text
-      text = null
+  format: () ->
+    err = null
+    args = [].slice.apply arguments
 
-    @setText(text)   if text?
-    @setup(options)  if options? and typeof options is 'object'
-    
-    @text = @beforeFormat @text
+    callback = if typeof args[-1..][0] is 'function' then args.pop() else null
+    options = if typeof args[-1..][0] is 'object' then args.pop() else null
+    text = if typeof args[-1..][0] is 'string' then args.pop() else null
 
-    for tretName in @tretsOrder
-      tretObj = @trets[tretName]
-      @text = tretObj.apply @text
+    try
+      @setText(text)   if text?
+      @setup(options)  if options? and typeof options is 'object'
+      
+      @text = @beforeFormat @text
 
-    @text = @afterFormat @text
+      settings = @getRuleSettings()
 
-    @text
+      for tretName in @tretsOrder
+        tretObj = @trets[tretName]
+        @text = tretObj.apply @text, settings[tretName]
+
+      @text = @afterFormat @text
+
+    catch e
+      err = e
+
+    if callback? and typeof callback is 'function'
+      callback err, @text
+    else
+      @text
 
 
-  ###
-   * Запустить типограф
-   *
-   * @param string $text
-   * @param array $options
-   * @return string
-  ###
-  @format: (text, options={}, callback) ->
-    obj = new this(text, options)
-    obj.format()
-
-  @getTretNames: (short=true) ->
-    @::getTretNames(short)
-
-  @getRuleNames: (mask) ->
-    @::getRuleNames(mask)
-
-  @getStyles: (list=false) ->
+  getStyles: @getStyles = (list=false) ->
     Lib.styles(list)
 
   ###
@@ -284,7 +274,7 @@ module.exports = class Mdash
    *
    * @param int $layout
   ###
-  @setLayout: (layout=Lib.LAYOUT_STYLE) ->
+  setLayout: @setLayout = (layout=Lib.LAYOUT_STYLE) ->
     Lib.LAYOUT = layout
   
   ###
@@ -292,6 +282,28 @@ module.exports = class Mdash
    *
    * @param string|bool $prefix если true то префикс 'mdash_', иначе то, что передали
   ###
-  @setLayoutClassPrefix: (prefix) ->
+  setLayoutClassPrefix: @setLayoutClassPrefix = (prefix) ->
     Lib.LAYOUT_CLASS_PREFIX = prefix  if prefix?
 
+
+  ###
+   * Запустить типограф
+   *
+   * @param string $text
+   * @param array $options
+   * @return string
+  ###
+  @format: () ->
+    args = [].slice.apply arguments
+
+    inst = new this()
+    inst.format.apply(inst, args)
+
+  @getTretNames: (short=true) ->
+    @::getTretNames(short)
+
+  @getRuleNames: (mask) ->
+    @::getRuleNames(mask)
+
+  @LAYOUT_STYLE: Lib.LAYOUT_STYLE
+  @LAYOUT_CLASS: Lib.LAYOUT_CLASS
