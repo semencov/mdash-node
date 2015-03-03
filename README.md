@@ -1,5 +1,7 @@
 # mdash
 
+[![NPM](https://nodei.co/npm/mdash-node.png?downloads=true&stars=true)](https://nodei.co/npm/mdash-node/)
+
 This is Node.js port of the original Russian Typograph ([mdash.ru](http://mdash.ru/)) by Evgeny Muravjev
 
 ## Getting Started
