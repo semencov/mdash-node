@@ -474,7 +474,7 @@ exports.processTags = (text="", processor=((txt)->txt)) ->
   text.replace /(\<\/?)(.+?)(\>)/gi, ($0, $1, $2, $3) ->
     $2 = "#{$2}".trim()
     
-    if $2.substr(0, 1) is "a"
+    if $2.trim() is "a"
       $2 = "%%%__" + processor($2)  
     else if $2.substr(0, 5) is "%%%__"
       $2 = processor($2.substr(5))

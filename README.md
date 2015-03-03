@@ -34,21 +34,19 @@ txt = tp.format("Типографика - это круто!", {
 });  // Типографика&nbsp;&mdash; это круто!
 ```
 
-You can also suplie a callback to the method `format`:
+You can also pass a callback to the method `format`:
 
 ```javascript
-var tp = new Mdash();
-
-txt = tp.format("Типографика - это круто!", {'Text.paragraphs': true}, function(err, text) {
+Mdash.format("Типографика - это круто!", {'Text.paragraphs': true}, function(err, text) {
   console.log(text);  // <p>Типографика&nbsp;&mdash; это круто!</p>
 });
 
-txt = tp.format("Типографика - это круто!", function(err, text) {
+Mdash.format("Типографика - это круто!", function(err, text) {
   console.log(text);  // Типографика&nbsp;&mdash; это круто!
 });
 ```
 
-Also you can get the list of trets and rules:
+Also you can get the list of trets (in order of appliance):
 
 ```javascript
 var typo = new Mdash();
@@ -72,9 +70,9 @@ Get rules for all tret or specific one:
 
 ```javascript
 var typo = new Mdash();
-var rules = typo.getRuleNames();  // Get all rules
+var allRules = typo.getRuleNames();  // Get all rules
 
-var dash = typo.getRuleNames('Dash');    // Specify a tret as argument
+var dashRules = typo.getRuleNames('Dash');    // Specify a tret as argument
 
 // { Dash:
 //    [ 'mdash_symbol_to_html_mdash',
