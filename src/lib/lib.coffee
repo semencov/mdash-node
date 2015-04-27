@@ -1,5 +1,3 @@
-colors = require('colors')
-
 exports.LAYOUT_STYLE = LAYOUT_STYLE = 1
 exports.LAYOUT_CLASS = LAYOUT_CLASS = 2
 
